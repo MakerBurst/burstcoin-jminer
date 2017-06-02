@@ -41,128 +41,101 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
-public class NetworkRequestPoolInfoTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestMiningInfoTask.class);
+public class NetworkRequestPoolInfoTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestMiningInfoTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  private String accountId;
-  private long connectionTimeout;
+    private String accountId;
+    private long connectionTimeout;
 
-  private String walletServer;
+    private String walletServer;
 
-  public void init(String walletServer, String accountId, long connectionTimeout)
-  {
-    this.walletServer = walletServer;
-    this.accountId = accountId;
-    this.connectionTimeout = connectionTimeout;
-  }
-
-  @Override
-  public void run()
-  {
-    String rewardRecipientAccountId = getRewardRecipientAccountId(accountId);
-    if(rewardRecipientAccountId != null)
-    {
-      // number of registered miner accounts
-      List<String> accountIdsOfRewardRecipient = getAccountIdsOfRewardRecipient(rewardRecipientAccountId);
-      Account account = getAccount(rewardRecipientAccountId);
-      if(account != null)
-      {
-        publisher.publishEvent(new NetworkPoolInfoEvent(account.getAccountRS(), account.getBalanceNQT(), account.getForgedBalanceNQT(),
-                accountIdsOfRewardRecipient != null ? accountIdsOfRewardRecipient.size() : 0));
-      }
+    public void init(String walletServer, String accountId, long connectionTimeout) {
+        this.walletServer = walletServer;
+        this.accountId = accountId;
+        this.connectionTimeout = connectionTimeout;
     }
-  }
 
-  private String getRewardRecipientAccountId(String accountId)
-  {
-    RewardRecipient rewardRecipient = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getRewardRecipient&account=" + accountId)
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
-
-      String contentAsString = response.getContentAsString();
-
-      if(!contentAsString.contains("error"))
-      {
-        rewardRecipient = objectMapper.readValue(contentAsString, RewardRecipient.class);
-      }
-      else
-      {
-        LOG.warn("Error: Failed to 'getRewardRecipient' for pool info: " + contentAsString);
-      }
+    @Override
+    public void run() {
+        String rewardRecipientAccountId = getRewardRecipientAccountId(accountId);
+        if (rewardRecipientAccountId != null) {
+            // number of registered miner accounts
+            List<String> accountIdsOfRewardRecipient = getAccountIdsOfRewardRecipient(rewardRecipientAccountId);
+            Account account = getAccount(rewardRecipientAccountId);
+            if (account != null) {
+                publisher.publishEvent(new NetworkPoolInfoEvent(account.getAccountRS(), account.getBalanceNQT(), account.getForgedBalanceNQT(),
+                        accountIdsOfRewardRecipient != null ? accountIdsOfRewardRecipient.size() : 0));
+            }
+        }
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getRewardRecipient' for pool info: " + e.getMessage());
+
+    private String getRewardRecipientAccountId(String accountId) {
+        RewardRecipient rewardRecipient = null;
+        try {
+            ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getRewardRecipient&account=" + accountId)
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
+
+            String contentAsString = response.getContentAsString();
+
+            if (!contentAsString.contains("error")) {
+                rewardRecipient = objectMapper.readValue(contentAsString, RewardRecipient.class);
+            } else {
+                LOG.warn("Error: Failed to 'getRewardRecipient' for pool info: " + contentAsString);
+            }
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getRewardRecipient' for pool info: " + e.getMessage());
+        }
+        return rewardRecipient != null ? rewardRecipient.getRewardRecipient() : null;
     }
-    return rewardRecipient != null ? rewardRecipient.getRewardRecipient() : null;
-  }
 
-  private List<String> getAccountIdsOfRewardRecipient(String rewardRecipientAccountId)
-  {
-    AccountsWithRewardRecipient accountsWithRewardRecipient = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getAccountsWithRewardRecipient&account=" + rewardRecipientAccountId)
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+    private List<String> getAccountIdsOfRewardRecipient(String rewardRecipientAccountId) {
+        AccountsWithRewardRecipient accountsWithRewardRecipient = null;
+        try {
+            ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getAccountsWithRewardRecipient&account=" + rewardRecipientAccountId)
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
 
-      String contentAsString = response.getContentAsString();
+            String contentAsString = response.getContentAsString();
 
-      if(!contentAsString.contains("error"))
-      {
-        accountsWithRewardRecipient = objectMapper.readValue(contentAsString, AccountsWithRewardRecipient.class);
-      }
-      else
-      {
-        LOG.warn("Error: Failed to 'getAccountIdsOfRewardRecipient' for pool info: " + contentAsString);
-      }
+            if (!contentAsString.contains("error")) {
+                accountsWithRewardRecipient = objectMapper.readValue(contentAsString, AccountsWithRewardRecipient.class);
+            } else {
+                LOG.warn("Error: Failed to 'getAccountIdsOfRewardRecipient' for pool info: " + contentAsString);
+            }
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getAccountIdsOfRewardRecipient' for pool info: " + e.getMessage());
+        }
+        return accountsWithRewardRecipient != null ? accountsWithRewardRecipient.getAccounts() : null;
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getAccountIdsOfRewardRecipient' for pool info: " + e.getMessage());
-    }
-    return accountsWithRewardRecipient != null ? accountsWithRewardRecipient.getAccounts() : null;
-  }
 
-  private Account getAccount(String accountId)
-  {
-    Account account = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getAccount&account=" + accountId)
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+    private Account getAccount(String accountId) {
+        Account account = null;
+        try {
+            ContentResponse response = httpClient.newRequest(walletServer + "/burst?requestType=getAccount&account=" + accountId)
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
 
-      String contentAsString = response.getContentAsString();
+            String contentAsString = response.getContentAsString();
 
-      if(!contentAsString.contains("error"))
-      {
-        account = objectMapper.readValue(contentAsString, Account.class);
-      }
-      else
-      {
-        LOG.warn("Error: Failed to 'getAccount' for pool info: " + contentAsString);
-      }
+            if (!contentAsString.contains("error")) {
+                account = objectMapper.readValue(contentAsString, Account.class);
+            } else {
+                LOG.warn("Error: Failed to 'getAccount' for pool info: " + contentAsString);
+            }
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getAccount' for pool info: " + e.getMessage());
+        }
+        return account;
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getAccount' for pool info: " + e.getMessage());
-    }
-    return account;
-  }
 }
 

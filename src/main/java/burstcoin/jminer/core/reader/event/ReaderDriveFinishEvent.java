@@ -25,41 +25,34 @@ package burstcoin.jminer.core.reader.event;
 
 import org.springframework.context.ApplicationEvent;
 
-public class ReaderDriveFinishEvent
-  extends ApplicationEvent
-{
-  private String directory;
-  private long size;
-  private long time;
-  private long blockNumber;
+public class ReaderDriveFinishEvent extends ApplicationEvent {
+    private String directory;
+    private long size;
+    private long time;
+    private long blockNumber;
 
-  public ReaderDriveFinishEvent(String directory, long size, long time, long blockNumber)
-  {
-    super(directory);
+    public ReaderDriveFinishEvent(String directory, long size, long time, long blockNumber) {
+        super(directory);
 
-    this.directory = directory;
-    this.size = size;
-    this.time = time;
-    this.blockNumber = blockNumber;
-  }
+        this.directory = directory;
+        this.size = size;
+        this.time = time;
+        this.blockNumber = blockNumber;
+    }
 
-  public long getTime()
-  {
-    return time;
-  }
+    public long getTime() {
+        return time;
+    }
 
-  public String getDirectory()
-  {
-    return directory;
-  }
+    public String getDirectory() {
+        return directory;
+    }
 
-  public long getSize()
-  {
-    return size;
-  }
+    public long getSize() {
+        return size;
+    }
 
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 }

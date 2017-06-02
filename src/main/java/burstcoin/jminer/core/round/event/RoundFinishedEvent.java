@@ -27,55 +27,49 @@ import org.springframework.context.ApplicationEvent;
 /**
  * The type Round finished event.
  */
-public class RoundFinishedEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private long bestCommittedDeadline;
-  private long roundTime;
+public class RoundFinishedEvent extends ApplicationEvent {
+    private long blockNumber;
+    private long bestCommittedDeadline;
+    private long roundTime;
 
-  /**
-   * Instantiates a new Round finished event.
-   *
-   * @param blockNumber the block number
-   * @param bestCommittedDeadline the best committed deadline
-   * @param roundTime the round time
-   */
-  public RoundFinishedEvent(long blockNumber, long bestCommittedDeadline, long roundTime)
-  {
-    super(blockNumber);
-    this.blockNumber = blockNumber;
-    this.bestCommittedDeadline = bestCommittedDeadline;
-    this.roundTime = roundTime;
-  }
+    /**
+     * Instantiates a new Round finished event.
+     *
+     * @param blockNumber           the block number
+     * @param bestCommittedDeadline the best committed deadline
+     * @param roundTime             the round time
+     */
+    public RoundFinishedEvent(long blockNumber, long bestCommittedDeadline, long roundTime) {
+        super(blockNumber);
+        this.blockNumber = blockNumber;
+        this.bestCommittedDeadline = bestCommittedDeadline;
+        this.roundTime = roundTime;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets best committed deadline.
-   *
-   * @return the best committed deadline
-   */
-  public long getBestCommittedDeadline()
-  {
-    return bestCommittedDeadline;
-  }
+    /**
+     * Gets best committed deadline.
+     *
+     * @return the best committed deadline
+     */
+    public long getBestCommittedDeadline() {
+        return bestCommittedDeadline;
+    }
 
-  /**
-   * Gets round time.
-   *
-   * @return the round time
-   */
-  public long getRoundTime()
-  {
-    return roundTime;
-  }
+    /**
+     * Gets round time.
+     *
+     * @return the round time
+     */
+    public long getRoundTime() {
+        return roundTime;
+    }
 }

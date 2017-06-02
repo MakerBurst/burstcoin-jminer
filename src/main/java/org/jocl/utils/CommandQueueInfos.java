@@ -31,93 +31,78 @@ import org.jocl.cl_command_queue;
 import org.jocl.cl_context;
 import org.jocl.cl_device_id;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_QUEUE_CONTEXT;
+import static org.jocl.CL.CL_QUEUE_PROPERTIES;
+import static org.jocl.CL.CL_QUEUE_REFERENCE_COUNT;
+import static org.jocl.CL.stringFor_cl_command_queue_properties;
 
 /**
  * Utility methods for obtaining information about cl_command_queue objects
  */
-public class CommandQueueInfos
-{
-  /**
-   * The context that this command queue belongs to
-   *
-   * @param commandQueue The command queue
-   *
-   * @return The value
-   */
-  public static cl_context getContext(cl_command_queue commandQueue)
-  {
-    cl_context result = new cl_context();
-    Infos.getPointer(Infos.FOR_COMMAND_QUEUE, commandQueue,
-                     CL_QUEUE_CONTEXT, result);
-    if(result.equals(new cl_context()))
-    {
-      return null;
+public class CommandQueueInfos {
+    /**
+     * The context that this command queue belongs to
+     *
+     * @param commandQueue The command queue
+     * @return The value
+     */
+    public static cl_context getContext(cl_command_queue commandQueue) {
+        cl_context result = new cl_context();
+        Infos.getPointer(Infos.FOR_COMMAND_QUEUE, commandQueue, CL_QUEUE_CONTEXT, result);
+        if (result.equals(new cl_context())) {
+            return null;
+        }
+        return result;
     }
-    return result;
-  }
 
-  /**
-   * The device that this command queue belongs to
-   *
-   * @param commandQueue The command queue
-   *
-   * @return The value
-   */
-  public static cl_device_id getDevice(cl_command_queue commandQueue)
-  {
-    cl_device_id result = new cl_device_id();
-    Infos.getPointer(Infos.FOR_COMMAND_QUEUE, commandQueue,
-                     CL_QUEUE_CONTEXT, result);
-    if(result.equals(new cl_device_id()))
-    {
-      return null;
+    /**
+     * The device that this command queue belongs to
+     *
+     * @param commandQueue The command queue
+     * @return The value
+     */
+    public static cl_device_id getDevice(cl_command_queue commandQueue) {
+        cl_device_id result = new cl_device_id();
+        Infos.getPointer(Infos.FOR_COMMAND_QUEUE, commandQueue, CL_QUEUE_CONTEXT, result);
+        if (result.equals(new cl_device_id())) {
+            return null;
+        }
+        return result;
     }
-    return result;
-  }
 
-  /**
-   * The reference count. Only intended for identifying memory leaks.
-   *
-   * @param commandQueue The command queue
-   *
-   * @return The value
-   */
-  public static int getReferenceCount(cl_command_queue commandQueue)
-  {
-    return Infos.getInt(Infos.FOR_COMMAND_QUEUE, commandQueue,
-                        CL_QUEUE_REFERENCE_COUNT);
-  }
+    /**
+     * The reference count. Only intended for identifying memory leaks.
+     *
+     * @param commandQueue The command queue
+     * @return The value
+     */
+    public static int getReferenceCount(cl_command_queue commandQueue) {
+        return Infos.getInt(Infos.FOR_COMMAND_QUEUE, commandQueue, CL_QUEUE_REFERENCE_COUNT);
+    }
 
-  /**
-   * The properties of the command queue.
-   *
-   * @param commandQueue The command queue
-   *
-   * @return The value
-   */
-  public static long getProperties(cl_command_queue commandQueue)
-  {
-    return Infos.getLong(Infos.FOR_COMMAND_QUEUE, commandQueue,
-                         CL_QUEUE_PROPERTIES);
-  }
+    /**
+     * The properties of the command queue.
+     *
+     * @param commandQueue The command queue
+     * @return The value
+     */
+    public static long getProperties(cl_command_queue commandQueue) {
+        return Infos.getLong(Infos.FOR_COMMAND_QUEUE, commandQueue, CL_QUEUE_PROPERTIES);
+    }
 
-  /**
-   * The properties of the command queue, as a String
-   *
-   * @param commandQueue The command queue
-   *
-   * @return The value
-   */
-  public static String getPropertiesString(cl_command_queue commandQueue)
-  {
-    return stringFor_cl_command_queue_properties(getProperties(commandQueue));
-  }
+    /**
+     * The properties of the command queue, as a String
+     *
+     * @param commandQueue The command queue
+     * @return The value
+     */
+    public static String getPropertiesString(cl_command_queue commandQueue) {
+        return stringFor_cl_command_queue_properties(getProperties(commandQueue));
+    }
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private CommandQueueInfos()
-  {
-  }
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private CommandQueueInfos() {
+    }
 }

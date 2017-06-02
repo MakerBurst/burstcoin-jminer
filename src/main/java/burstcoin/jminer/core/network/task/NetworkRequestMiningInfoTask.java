@@ -45,97 +45,77 @@ import java.util.concurrent.TimeoutException;
  */
 @Component
 @Scope("prototype")
-public class NetworkRequestMiningInfoTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestMiningInfoTask.class);
+public class NetworkRequestMiningInfoTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestMiningInfoTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  private long blockNumber;
-  private String server;
+    private long blockNumber;
+    private String server;
 
-  private boolean poolMining;
-  private long connectionTimeout;
-  private long defaultTargetDeadline;
+    private boolean poolMining;
+    private long connectionTimeout;
+    private long defaultTargetDeadline;
 
-  public void init(String server, long blockNumber, boolean poolMining, long connectionTimeout, long defaultTargetDeadline)
-  {
-    this.server = server;
-    this.blockNumber = blockNumber;
-    this.poolMining = poolMining;
-    this.connectionTimeout = connectionTimeout;
+    public void init(String server, long blockNumber, boolean poolMining, long connectionTimeout, long defaultTargetDeadline) {
+        this.server = server;
+        this.blockNumber = blockNumber;
+        this.poolMining = poolMining;
+        this.connectionTimeout = connectionTimeout;
 
-    this.defaultTargetDeadline = defaultTargetDeadline;
-  }
+        this.defaultTargetDeadline = defaultTargetDeadline;
+    }
 
-  @Override
-  public void run()
-  {
-    LOG.trace("start check network state");
+    @Override
+    public void run() {
+        LOG.trace("start check network state");
 
-    MiningInfoResponse result;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getMiningInfo")
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+        MiningInfoResponse result;
+        try {
+            ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getMiningInfo")
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
 
-      result = objectMapper.readValue(response.getContentAsString(), MiningInfoResponse.class);
+            result = objectMapper.readValue(response.getContentAsString(), MiningInfoResponse.class);
 
-      if(result != null)
-      {
-        long blockNumber = Convert.parseUnsignedLong(result.getHeight());
+            if (result != null) {
+                long blockNumber = Convert.parseUnsignedLong(result.getHeight());
 
-        if(blockNumber > this.blockNumber)
-        {
-          byte[] generationSignature = Convert.parseHexString(result.getGenerationSignature());
-          long baseTarget = Convert.parseUnsignedLong(result.getBaseTarget());
+                if (blockNumber > this.blockNumber) {
+                    byte[] generationSignature = Convert.parseHexString(result.getGenerationSignature());
+                    long baseTarget = Convert.parseUnsignedLong(result.getBaseTarget());
 
-          // ensure default is not 0
-          defaultTargetDeadline = defaultTargetDeadline > 0 ? defaultTargetDeadline : Long.MAX_VALUE;
-          long targetDeadline = poolMining ? result.getTargetDeadline() > 0 ? result.getTargetDeadline() : defaultTargetDeadline : defaultTargetDeadline;
+                    // ensure default is not 0
+                    defaultTargetDeadline = defaultTargetDeadline > 0 ? defaultTargetDeadline : Long.MAX_VALUE;
+                    long targetDeadline = poolMining ? result.getTargetDeadline() > 0 ? result.getTargetDeadline() : defaultTargetDeadline : defaultTargetDeadline;
 
-          publisher.publishEvent(new NetworkStateChangeEvent(blockNumber, baseTarget, generationSignature, targetDeadline));
+                    publisher.publishEvent(new NetworkStateChangeEvent(blockNumber, baseTarget, generationSignature, targetDeadline));
+                } else {
+                    LOG.trace("not publish NetworkStateChangeEvent ... '" + blockNumber + " <= " + this.blockNumber + "'");
+                }
+            } else {
+                LOG.warn("Unable to parse mining info: " + response.getContentAsString());
+            }
+        } catch (TimeoutException timeoutException) {
+            LOG.warn("Unable to get mining info from wallet, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
+        } catch (Exception e) {
+            if (e instanceof ConnectException) {
+                LOG.warn("Unable to get mining info from wallet due ConnectException.");
+                LOG.debug("Unable to get mining info from wallet due ConnectException:" + e.getMessage(), e);
+            } else if (e instanceof EOFException) {
+                LOG.warn("Unable to get mining info from wallet due EOFException.");
+                LOG.debug("Unable to get mining info from wallet due EOFException:" + e.getMessage(), e);
+            } else {
+                LOG.warn("Unable to get mining info from wallet.");
+                LOG.debug("Unable to get mining info from wallet: " + e.getMessage(), e);
+            }
         }
-        else
-        {
-          LOG.trace("not publish NetworkStateChangeEvent ... '" + blockNumber + " <= " + this.blockNumber + "'");
-        }
-      }
-      else
-      {
-        LOG.warn("Unable to parse mining info: " + response.getContentAsString());
-      }
     }
-    catch(TimeoutException timeoutException)
-    {
-      LOG.warn("Unable to get mining info from wallet, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
-    }
-    catch(Exception e)
-    {
-      if(e instanceof ConnectException)
-      {
-        LOG.warn("Unable to get mining info from wallet due ConnectException.");
-        LOG.debug("Unable to get mining info from wallet due ConnectException:" + e.getMessage(), e);
-      }
-      else if(e instanceof EOFException)
-      {
-        LOG.warn("Unable to get mining info from wallet due EOFException.");
-        LOG.debug("Unable to get mining info from wallet due EOFException:" + e.getMessage(), e);
-      }
-      else
-      {
-        LOG.warn("Unable to get mining info from wallet.");
-        LOG.debug("Unable to get mining info from wallet: " + e.getMessage(), e);
-      }
-    }
-  }
 }

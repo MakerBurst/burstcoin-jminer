@@ -25,28 +25,23 @@ package burstcoin.jminer.core.network.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class Blocks implements Serializable
-{
-  private List<Block> blocks;
-  private long requestProcessingTime;
+public class Blocks implements Serializable {
+    private List<Block> blocks;
+    private long requestProcessingTime;
 
-  public Blocks()
-  {
-  }
+    public Blocks() {
+    }
 
-  public Blocks(List<Block> blocks, long requestProcessingTime)
-  {
-    this.blocks = blocks;
-    this.requestProcessingTime = requestProcessingTime;
-  }
+    public Blocks(List<Block> blocks, long requestProcessingTime) {
+        this.blocks = blocks;
+        this.requestProcessingTime = requestProcessingTime;
+    }
 
-  public List<Block> getBlocks()
-  {
-    return blocks;
-  }
+    public List<Block> getBlocks() {
+        return blocks;
+    }
 
-  public long getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    public long getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 }

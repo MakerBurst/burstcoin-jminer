@@ -42,74 +42,62 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
-public class NetworkRequestAccountBlocksTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestLastWinnerTask.class);
+public class NetworkRequestAccountBlocksTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestLastWinnerTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  // data
+    // data
 
-  private String accountId;
-  private String server;
+    private String accountId;
+    private String server;
 
-  public void init(String accountId, String server)
-  {
-    this.accountId = accountId;
-    this.server = server;
-  }
-
-  @Override
-  public void run()
-  {
-    Blocks accountBlocks = getAccountBlocks(accountId);
-    publisher.publishEvent(new NetworkBlocksEvent(accountBlocks));
-  }
-
-  private Blocks getAccountBlocks(String accountId)
-  {
-    LOG.info("Requesting mined blocks from wallet ...");
-    Blocks blocks = null;
-    try
-    {
-      long connectionTimeout = CoreProperties.getConnectionTimeout() * 3;
-      InputStreamResponseListener listener = new InputStreamResponseListener();
-
-      Request request = httpClient.newRequest(server+ "/burst");
-      request.param("requestType", "getAccountBlocks");
-      request.param("account", accountId);
-      request.timeout(connectionTimeout, TimeUnit.MILLISECONDS);
-      request.send(listener);
-      Response response = listener.get(connectionTimeout, TimeUnit.MILLISECONDS);
-
-      // Look at the response
-      if(response.getStatus() == 200)
-      {
-        // Use try-with-resources to close input stream.
-        try (InputStream responseContent = listener.getInputStream())
-        {
-          blocks = objectMapper.readValue(responseContent, Blocks.class);
-
-          LOG.info("Total mined blocks: '" + blocks.getBlocks().size() + "', received in '" + blocks.getRequestProcessingTime() + "' ms");
-        }
-        catch(Exception e)
-        {
-          LOG.error("Failed to receive account blocks.", e);
-        }
-      }
+    public void init(String accountId, String server) {
+        this.accountId = accountId;
+        this.server = server;
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getAccountBlocks': " + e.getMessage());
+
+    @Override
+    public void run() {
+        Blocks accountBlocks = getAccountBlocks(accountId);
+        publisher.publishEvent(new NetworkBlocksEvent(accountBlocks));
     }
-    return blocks;
-  }
+
+    private Blocks getAccountBlocks(String accountId) {
+        LOG.info("Requesting mined blocks from wallet ...");
+        Blocks blocks = null;
+        try {
+            long connectionTimeout = CoreProperties.getConnectionTimeout() * 3;
+            InputStreamResponseListener listener = new InputStreamResponseListener();
+
+            Request request = httpClient.newRequest(server + "/burst");
+            request.param("requestType", "getAccountBlocks");
+            request.param("account", accountId);
+            request.timeout(connectionTimeout, TimeUnit.MILLISECONDS);
+            request.send(listener);
+            Response response = listener.get(connectionTimeout, TimeUnit.MILLISECONDS);
+
+            // Look at the response
+            if (response.getStatus() == 200) {
+                // Use try-with-resources to close input stream.
+                try (InputStream responseContent = listener.getInputStream()) {
+                    blocks = objectMapper.readValue(responseContent, Blocks.class);
+
+                    LOG.info("Total mined blocks: '" + blocks.getBlocks().size() + "', received in '" + blocks.getRequestProcessingTime() + "' ms");
+                } catch (Exception e) {
+                    LOG.error("Failed to receive account blocks.", e);
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getAccountBlocks': " + e.getMessage());
+        }
+        return blocks;
+    }
 }

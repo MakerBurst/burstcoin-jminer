@@ -25,41 +25,34 @@ package burstcoin.jminer.core.network.event;
 import org.springframework.context.ApplicationEvent;
 
 
-public class NetworkPoolInfoEvent
-  extends ApplicationEvent
-{
-  private String poolAccountRS;
-  private String poolBalanceNQT;
-  private String poolForgedBalanceNQT;
-  private int poolNumberOfMiningAccounts; // todo find active
+public class NetworkPoolInfoEvent extends ApplicationEvent {
+    private String poolAccountRS;
+    private String poolBalanceNQT;
+    private String poolForgedBalanceNQT;
+    private int poolNumberOfMiningAccounts; // todo find active
 
-  public NetworkPoolInfoEvent(String poolAccountRS, String poolBalanceNQT, String poolForgedBalanceNQT, int poolNumberOfMiningAccounts)
-  {
-    super(poolAccountRS);
+    public NetworkPoolInfoEvent(String poolAccountRS, String poolBalanceNQT, String poolForgedBalanceNQT, int poolNumberOfMiningAccounts) {
+        super(poolAccountRS);
 
-    this.poolAccountRS = poolAccountRS;
-    this.poolBalanceNQT = poolBalanceNQT;
-    this.poolForgedBalanceNQT = poolForgedBalanceNQT;
-    this.poolNumberOfMiningAccounts = poolNumberOfMiningAccounts;
-  }
+        this.poolAccountRS = poolAccountRS;
+        this.poolBalanceNQT = poolBalanceNQT;
+        this.poolForgedBalanceNQT = poolForgedBalanceNQT;
+        this.poolNumberOfMiningAccounts = poolNumberOfMiningAccounts;
+    }
 
-  public String getPoolAccountRS()
-  {
-    return poolAccountRS;
-  }
+    public String getPoolAccountRS() {
+        return poolAccountRS;
+    }
 
-  public String getPoolBalanceNQT()
-  {
-    return poolBalanceNQT;
-  }
+    public String getPoolBalanceNQT() {
+        return poolBalanceNQT;
+    }
 
-  public String getPoolForgedBalanceNQT()
-  {
-    return poolForgedBalanceNQT;
-  }
+    public String getPoolForgedBalanceNQT() {
+        return poolForgedBalanceNQT;
+    }
 
-  public int getPoolNumberOfMiningAccounts()
-  {
-    return poolNumberOfMiningAccounts;
-  }
+    public int getPoolNumberOfMiningAccounts() {
+        return poolNumberOfMiningAccounts;
+    }
 }

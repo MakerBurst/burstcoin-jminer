@@ -27,43 +27,38 @@ import org.springframework.context.ApplicationEvent;
 /**
  * fired if last winner was found
  */
-public class NetworkLastWinnerEvent
-  extends ApplicationEvent
-{
-  private long lastBlockNumber;
-  private String winner;
+public class NetworkLastWinnerEvent extends ApplicationEvent {
+    private long lastBlockNumber;
+    private String winner;
 
-  /**
-   * Instantiates a new Network last winner event.
-   *
-   * @param source the source
-   * @param lastBlockNumber the last block number
-   * @param winner the winner
-   */
-  public NetworkLastWinnerEvent(Object source, long lastBlockNumber, String winner)
-  {
-    super(source);
-    this.lastBlockNumber = lastBlockNumber;
-    this.winner = winner;
-  }
+    /**
+     * Instantiates a new Network last winner event.
+     *
+     * @param source          the source
+     * @param lastBlockNumber the last block number
+     * @param winner          the winner
+     */
+    public NetworkLastWinnerEvent(Object source, long lastBlockNumber, String winner) {
+        super(source);
+        this.lastBlockNumber = lastBlockNumber;
+        this.winner = winner;
+    }
 
-  /**
-   * Gets last block number.
-   *
-   * @return the last block number
-   */
-  public long getLastBlockNumber()
-  {
-    return lastBlockNumber;
-  }
+    /**
+     * Gets last block number.
+     *
+     * @return the last block number
+     */
+    public long getLastBlockNumber() {
+        return lastBlockNumber;
+    }
 
-  /**
-   * Gets winner.
-   *
-   * @return the winner
-   */
-  public String getWinner()
-  {
-    return winner;
-  }
+    /**
+     * Gets winner.
+     *
+     * @return the winner
+     */
+    public String getWinner() {
+        return winner;
+    }
 }

@@ -26,96 +26,86 @@ import org.jocl.cl_context;
 import org.jocl.cl_kernel;
 import org.jocl.cl_program;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_KERNEL_CONTEXT;
+import static org.jocl.CL.CL_KERNEL_FUNCTION_NAME;
+import static org.jocl.CL.CL_KERNEL_NUM_ARGS;
+import static org.jocl.CL.CL_KERNEL_PROGRAM;
+import static org.jocl.CL.CL_KERNEL_REFERENCE_COUNT;
 
 /**
  * Utility methods for obtaining information about cl_kernel objects
  */
-public class KernelInfos
-{
-  /**
-   * The kernel function name.
-   *
-   * @param kernel The kernel
-   *
-   * @return The value
-   */
-  public static String getFunctionName(cl_kernel kernel)
-  {
-    return Infos.getString(Infos.FOR_KERNEL, kernel,
-                           CL_KERNEL_FUNCTION_NAME);
-  }
-
-  /**
-   * The reference count - only provided for identifying memory leaks.
-   *
-   * @param kernel The kernel
-   *
-   * @return The value
-   */
-  public static int getReferenceCount(cl_kernel kernel)
-  {
-    return Infos.getInt(Infos.FOR_KERNEL, kernel,
-                        CL_KERNEL_REFERENCE_COUNT);
-  }
-
-  /**
-   * The number of arguments
-   *
-   * @param kernel The kernel
-   *
-   * @return The value
-   */
-  public static int getNumArgs(cl_kernel kernel)
-  {
-    return Infos.getInt(Infos.FOR_KERNEL, kernel,
-                        CL_KERNEL_NUM_ARGS);
-  }
-
-  /**
-   * The context that this kernel belongs to
-   *
-   * @param kernel The kernel
-   *
-   * @return The value
-   */
-  public static cl_context getContext(cl_kernel kernel)
-  {
-    cl_context result = new cl_context();
-    Infos.getPointer(Infos.FOR_KERNEL, kernel,
-                     CL_KERNEL_CONTEXT, result);
-    if(result.equals(new cl_context()))
-    {
-      return null;
+public class KernelInfos {
+    /**
+     * The kernel function name.
+     *
+     * @param kernel The kernel
+     * @return The value
+     */
+    public static String getFunctionName(cl_kernel kernel) {
+        return Infos.getString(Infos.FOR_KERNEL, kernel,
+                CL_KERNEL_FUNCTION_NAME);
     }
-    return result;
-  }
 
-  /**
-   * The program that this kernel belongs to
-   *
-   * @param kernel The kernel
-   *
-   * @return The value
-   */
-  public static cl_program getProgram(cl_kernel kernel)
-  {
-    cl_program result = new cl_program();
-    Infos.getPointer(Infos.FOR_KERNEL, kernel,
-                     CL_KERNEL_PROGRAM, result);
-    if(result.equals(new cl_program()))
-    {
-      return null;
+    /**
+     * The reference count - only provided for identifying memory leaks.
+     *
+     * @param kernel The kernel
+     * @return The value
+     */
+    public static int getReferenceCount(cl_kernel kernel) {
+        return Infos.getInt(Infos.FOR_KERNEL, kernel,
+                CL_KERNEL_REFERENCE_COUNT);
     }
-    return result;
-  }
+
+    /**
+     * The number of arguments
+     *
+     * @param kernel The kernel
+     * @return The value
+     */
+    public static int getNumArgs(cl_kernel kernel) {
+        return Infos.getInt(Infos.FOR_KERNEL, kernel,
+                CL_KERNEL_NUM_ARGS);
+    }
+
+    /**
+     * The context that this kernel belongs to
+     *
+     * @param kernel The kernel
+     * @return The value
+     */
+    public static cl_context getContext(cl_kernel kernel) {
+        cl_context result = new cl_context();
+        Infos.getPointer(Infos.FOR_KERNEL, kernel,
+                CL_KERNEL_CONTEXT, result);
+        if (result.equals(new cl_context())) {
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * The program that this kernel belongs to
+     *
+     * @param kernel The kernel
+     * @return The value
+     */
+    public static cl_program getProgram(cl_kernel kernel) {
+        cl_program result = new cl_program();
+        Infos.getPointer(Infos.FOR_KERNEL, kernel,
+                CL_KERNEL_PROGRAM, result);
+        if (result.equals(new cl_program())) {
+            return null;
+        }
+        return result;
+    }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private KernelInfos()
-  {
-  }
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private KernelInfos() {
+    }
 
 }

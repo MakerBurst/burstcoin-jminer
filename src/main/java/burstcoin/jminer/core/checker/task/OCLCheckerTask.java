@@ -36,53 +36,46 @@ import java.math.BigInteger;
 
 @Component
 @Scope("prototype")
-public class OCLCheckerTask
-  implements Runnable
-{
-  private final ApplicationEventPublisher publisher;
-  private final OCLChecker oclChecker;
+public class OCLCheckerTask implements Runnable {
+    private final ApplicationEventPublisher publisher;
+    private final OCLChecker oclChecker;
 
-  private long blockNumber;
-  private byte[] generationSignature;
-  private byte[] scoops;
-  private BigInteger chunkPartStartNonce;
+    private long blockNumber;
+    private byte[] generationSignature;
+    private byte[] scoops;
+    private BigInteger chunkPartStartNonce;
 
-  @Autowired
-  public OCLCheckerTask(OCLChecker oclChecker, ApplicationEventPublisher publisher)
-  {
-    this.oclChecker = oclChecker;
-    this.publisher = publisher;
-  }
-
-  public void init(long blockNumber, byte[] generationSignature, byte[] scoops, BigInteger chunkPartStartNonce)
-  {
-    this.blockNumber = blockNumber;
-    this.generationSignature = generationSignature;
-    this.scoops = scoops;
-    this.chunkPartStartNonce = chunkPartStartNonce;
-  }
-
-  @Override
-  public void run()
-  {
-    int lowestNonce;
-    synchronized(oclChecker)
-    {
-      lowestNonce = oclChecker.findLowest(generationSignature, scoops);
+    @Autowired
+    public OCLCheckerTask(OCLChecker oclChecker, ApplicationEventPublisher publisher) {
+        this.oclChecker = oclChecker;
+        this.publisher = publisher;
     }
-    BigInteger nonce = chunkPartStartNonce.add(BigInteger.valueOf(lowestNonce));
 
-    BigInteger result = calculateResult(scoops, generationSignature, lowestNonce);
-    publisher.publishEvent(new CheckerResultEvent(blockNumber, chunkPartStartNonce, nonce, result));
-  }
+    public void init(long blockNumber, byte[] generationSignature, byte[] scoops, BigInteger chunkPartStartNonce) {
+        this.blockNumber = blockNumber;
+        this.generationSignature = generationSignature;
+        this.scoops = scoops;
+        this.chunkPartStartNonce = chunkPartStartNonce;
+    }
 
-  private BigInteger calculateResult(byte[] scoops, byte[] generationSignature, int nonce)
-  {
-    Shabal256 md = new Shabal256();
-    md.reset();
-    md.update(generationSignature);
-    md.update(scoops, nonce * MiningPlot.SCOOP_SIZE, MiningPlot.SCOOP_SIZE);
-    byte[] hash = md.digest();
-    return new BigInteger(1, new byte[]{hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
-  }
+    @Override
+    public void run() {
+        int lowestNonce;
+        synchronized (oclChecker) {
+            lowestNonce = oclChecker.findLowest(generationSignature, scoops);
+        }
+        BigInteger nonce = chunkPartStartNonce.add(BigInteger.valueOf(lowestNonce));
+
+        BigInteger result = calculateResult(scoops, generationSignature, lowestNonce);
+        publisher.publishEvent(new CheckerResultEvent(blockNumber, chunkPartStartNonce, nonce, result));
+    }
+
+    private BigInteger calculateResult(byte[] scoops, byte[] generationSignature, int nonce) {
+        Shabal256 md = new Shabal256();
+        md.reset();
+        md.update(generationSignature);
+        md.update(scoops, nonce * MiningPlot.SCOOP_SIZE, MiningPlot.SCOOP_SIZE);
+        byte[] hash = md.digest();
+        return new BigInteger(1, new byte[]{hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
+    }
 }

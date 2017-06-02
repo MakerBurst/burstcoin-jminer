@@ -36,90 +36,79 @@ import java.util.Map;
 /**
  * The type Plot drive.
  */
-public class PlotDrive
-{
-  private static final Logger LOG = LoggerFactory.getLogger(PlotDrive.class);
+public class PlotDrive {
+    private static final Logger LOG = LoggerFactory.getLogger(PlotDrive.class);
 
-  private Collection<PlotFile> plotFiles;
-  private String directory;
+    private Collection<PlotFile> plotFiles;
+    private String directory;
 
-  /**
-   * Instantiates a new Plot drive.
-   *
-   * @param directory the directory
-   * @param plotFilePaths the plot file paths
-   * @param chunkPartNonces the chunk part nonces
-   */
-  public PlotDrive(String directory, Collection<Path> plotFilePaths, Long chunkPartNonces)
-  {
-    this.directory = directory;
+    /**
+     * Instantiates a new Plot drive.
+     *
+     * @param directory       the directory
+     * @param plotFilePaths   the plot file paths
+     * @param chunkPartNonces the chunk part nonces
+     */
+    public PlotDrive(String directory, Collection<Path> plotFilePaths, Long chunkPartNonces) {
+        this.directory = directory;
 
-    plotFiles = new HashSet<>();
-    for(Path path : plotFilePaths)
-    {
-      PlotFile plotFile = new PlotFile(path, chunkPartNonces);
-      plotFiles.add(plotFile);
+        plotFiles = new HashSet<>();
+        for (Path path : plotFilePaths) {
+            PlotFile plotFile = new PlotFile(path, chunkPartNonces);
+            plotFiles.add(plotFile);
 
-      if(plotFile.getStaggeramt() % plotFile.getNumberOfParts() != 0)
-      {
-        LOG.error("could not calculate valid numberOfParts: " + plotFile.getFilePath());
-      }
+            if (plotFile.getStaggeramt() % plotFile.getNumberOfParts() != 0) {
+                LOG.error("could not calculate valid numberOfParts: " + plotFile.getFilePath());
+            }
+        }
     }
-  }
 
-  /**
-   * Gets plot files.
-   *
-   * @return the plot files
-   */
-  public Collection<PlotFile> getPlotFiles()
-  {
-    return plotFiles;
-  }
-
-  /**
-   * Gets directory.
-   *
-   * @return the directory
-   */
-  public String getDirectory()
-  {
-    return directory;
-  }
-
-  /**
-   * Collect chunk part start nonces.
-   *
-   * @return the map
-   */
-  public Map<BigInteger, Long> collectChunkPartStartNonces()
-  {
-    Map<BigInteger, Long> chunkPartStartNonces = new HashMap<>();
-    for(PlotFile plotFile : plotFiles)
-    {
-      int expectedSize = chunkPartStartNonces.size() + plotFile.getChunkPartStartNonces().size();
-      chunkPartStartNonces.putAll(plotFile.getChunkPartStartNonces());
-      if(expectedSize != chunkPartStartNonces.size())
-      {
-        LOG.warn("possible overlapping plot-file '" + plotFile.getFilePath() + "', please check your plots.");
-      }
+    /**
+     * Gets plot files.
+     *
+     * @return the plot files
+     */
+    public Collection<PlotFile> getPlotFiles() {
+        return plotFiles;
     }
-    return chunkPartStartNonces;
-  }
 
-  /**
-   * Gets size.
-   *
-   * @return the size
-   */
+    /**
+     * Gets directory.
+     *
+     * @return the directory
+     */
+    public String getDirectory() {
+        return directory;
+    }
+
+    /**
+     * Collect chunk part start nonces.
+     *
+     * @return the map
+     */
+    public Map<BigInteger, Long> collectChunkPartStartNonces() {
+        Map<BigInteger, Long> chunkPartStartNonces = new HashMap<>();
+        for (PlotFile plotFile : plotFiles) {
+            int expectedSize = chunkPartStartNonces.size() + plotFile.getChunkPartStartNonces().size();
+            chunkPartStartNonces.putAll(plotFile.getChunkPartStartNonces());
+            if (expectedSize != chunkPartStartNonces.size()) {
+                LOG.warn("possible overlapping plot-file '" + plotFile.getFilePath() + "', please check your plots.");
+            }
+        }
+        return chunkPartStartNonces;
+    }
+
+    /**
+     * Gets size.
+     *
+     * @return the size
+     */
 // returns total number of bytes of all plotFiles
-  public long getSize()
-  {
-    long size = 0;
-    for(PlotFile plotFile : plotFiles)
-    {
-      size += plotFile.getSize();
+    public long getSize() {
+        long size = 0;
+        for (PlotFile plotFile : plotFiles) {
+            size += plotFile.getSize();
+        }
+        return size;
     }
-    return size;
-  }
 }

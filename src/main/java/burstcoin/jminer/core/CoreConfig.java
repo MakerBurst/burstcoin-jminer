@@ -38,56 +38,46 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 @ComponentScan(basePackages = "burstcoin.jminer.core")
-public class CoreConfig
-{
-  @Bean(name = "readerPool")
-  public ThreadPoolTaskExecutor readerPool()
-  {
-    ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-    pool.setThreadPriority(Thread.NORM_PRIORITY);
-    // false-> triggers interrupt exception at shutdown
-    pool.setWaitForTasksToCompleteOnShutdown(true);
-    return pool;
-  }
-
-  @Bean(name = "networkPool")
-  public SimpleAsyncTaskExecutor networkPool()
-  {
-    SimpleAsyncTaskExecutor pool = new SimpleAsyncTaskExecutor();
-    pool.setThreadPriority(Thread.NORM_PRIORITY + 1);
-    return pool;
-  }
-
-  @Bean(name = "checkTaskExecutor")
-  public SyncTaskExecutor taskExecutor()
-  {
-    return new SyncTaskExecutor();
-  }
-
-  @Bean(name = "roundPool")
-  public ThreadPoolTaskExecutor roundPool()
-  {
-    return new ThreadPoolTaskExecutor();
-  }
-
-  @Bean
-  public HttpClient httpClient()
-  {
-    HttpClient client = new HttpClient();
-    try
-    {
-      client.start();
+public class CoreConfig {
+    @Bean(name = "readerPool")
+    public ThreadPoolTaskExecutor readerPool() {
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setThreadPriority(Thread.NORM_PRIORITY);
+        // false-> triggers interrupt exception at shutdown
+        pool.setWaitForTasksToCompleteOnShutdown(true);
+        return pool;
     }
-    catch(Exception e)
-    {
-      e.printStackTrace();
-    }
-    return client;
-  }
 
-  @Bean
-  public ObjectMapper objectMapper()
-  {
-    return new ObjectMapper();
-  }
+    @Bean(name = "networkPool")
+    public SimpleAsyncTaskExecutor networkPool() {
+        SimpleAsyncTaskExecutor pool = new SimpleAsyncTaskExecutor();
+        pool.setThreadPriority(Thread.NORM_PRIORITY + 1);
+        return pool;
+    }
+
+    @Bean(name = "checkTaskExecutor")
+    public SyncTaskExecutor taskExecutor() {
+        return new SyncTaskExecutor();
+    }
+
+    @Bean(name = "roundPool")
+    public ThreadPoolTaskExecutor roundPool() {
+        return new ThreadPoolTaskExecutor();
+    }
+
+    @Bean
+    public HttpClient httpClient() {
+        HttpClient client = new HttpClient();
+        try {
+            client.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return client;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 }

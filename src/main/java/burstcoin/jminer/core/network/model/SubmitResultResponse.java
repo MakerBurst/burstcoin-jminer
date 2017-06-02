@@ -27,156 +27,140 @@ import java.io.Serializable;
 /**
  * The type Submit result response.
  */
-public class SubmitResultResponse
-  implements Serializable
-{
-  private String result;
-  private long requestProcessingTime;
-  private long deadline;
+public class SubmitResultResponse implements Serializable {
+    private String result;
+    private long requestProcessingTime;
+    private long deadline;
 
-  // pool response
-  private long block;
-  private String deadlineString;
-  private long targetDeadline;
+    // pool response
+    private long block;
+    private String deadlineString;
+    private long targetDeadline;
 
-  /**
-   * Instantiates a new Submit result response.
-   */
-  protected SubmitResultResponse()
-  {
-  }
+    /**
+     * Instantiates a new Submit result response.
+     */
+    protected SubmitResultResponse() {
+    }
 
-  /**
-   * Instantiates a new Submit result response.
-   *
-   * @param result the result
-   * @param requestProcessingTime the request processing time
-   * @param deadline the deadline
-   */
-  public SubmitResultResponse(String result, long requestProcessingTime, long deadline)
-  {
-    this.result = result;
-    this.requestProcessingTime = requestProcessingTime;
-    this.deadline = deadline;
-  }
+    /**
+     * Instantiates a new Submit result response.
+     *
+     * @param result                the result
+     * @param requestProcessingTime the request processing time
+     * @param deadline              the deadline
+     */
+    public SubmitResultResponse(String result, long requestProcessingTime, long deadline) {
+        this.result = result;
+        this.requestProcessingTime = requestProcessingTime;
+        this.deadline = deadline;
+    }
 
-  /**
-   * Gets result.
-   *
-   * @return the result
-   */
-  public String getResult()
-  {
-    return result;
-  }
+    /**
+     * Gets result.
+     *
+     * @return the result
+     */
+    public String getResult() {
+        return result;
+    }
 
-  /**
-   * Sets result.
-   *
-   * @param result the result
-   */
-  public void setResult(String result)
-  {
-    this.result = result;
-  }
+    /**
+     * Sets result.
+     *
+     * @param result the result
+     */
+    public void setResult(String result) {
+        this.result = result;
+    }
 
-  /**
-   * Gets request processing time.
-   *
-   * @return the request processing time
-   */
-  public long getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    /**
+     * Gets request processing time.
+     *
+     * @return the request processing time
+     */
+    public long getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 
-  /**
-   * Sets request processing time.
-   *
-   * @param requestProcessingTime the request processing time
-   */
-  public void setRequestProcessingTime(long requestProcessingTime)
-  {
-    this.requestProcessingTime = requestProcessingTime;
-  }
+    /**
+     * Sets request processing time.
+     *
+     * @param requestProcessingTime the request processing time
+     */
+    public void setRequestProcessingTime(long requestProcessingTime) {
+        this.requestProcessingTime = requestProcessingTime;
+    }
 
-  /**
-   * Gets deadline.
-   *
-   * @return the deadline
-   */
-  public long getDeadline()
-  {
-    return deadline;
-  }
+    /**
+     * Gets deadline.
+     *
+     * @return the deadline
+     */
+    public long getDeadline() {
+        return deadline;
+    }
 
-  /**
-   * Sets deadline.
-   *
-   * @param deadline the deadline
-   */
-  public void setDeadline(long deadline)
-  {
-    this.deadline = deadline;
-  }
+    /**
+     * Sets deadline.
+     *
+     * @param deadline the deadline
+     */
+    public void setDeadline(long deadline) {
+        this.deadline = deadline;
+    }
 
-  /**
-   * Gets block.
-   *
-   * @return the block
-   */
-  public long getBlock()
-  {
-    return block;
-  }
+    /**
+     * Gets block.
+     *
+     * @return the block
+     */
+    public long getBlock() {
+        return block;
+    }
 
-  /**
-   * Sets block.
-   *
-   * @param block the block
-   */
-  public void setBlock(long block)
-  {
-    this.block = block;
-  }
+    /**
+     * Sets block.
+     *
+     * @param block the block
+     */
+    public void setBlock(long block) {
+        this.block = block;
+    }
 
-  /**
-   * Gets deadline string.
-   *
-   * @return the deadline string
-   */
-  public String getDeadlineString()
-  {
-    return deadlineString;
-  }
+    /**
+     * Gets deadline string.
+     *
+     * @return the deadline string
+     */
+    public String getDeadlineString() {
+        return deadlineString;
+    }
 
-  /**
-   * Sets deadline string.
-   *
-   * @param deadlineString the deadline string
-   */
-  public void setDeadlineString(String deadlineString)
-  {
-    this.deadlineString = deadlineString;
-  }
+    /**
+     * Sets deadline string.
+     *
+     * @param deadlineString the deadline string
+     */
+    public void setDeadlineString(String deadlineString) {
+        this.deadlineString = deadlineString;
+    }
 
-  /**
-   * Gets target deadline.
-   *
-   * @return the target deadline
-   */
-  public long getTargetDeadline()
-  {
-    return targetDeadline;
-  }
+    /**
+     * Gets target deadline.
+     *
+     * @return the target deadline
+     */
+    public long getTargetDeadline() {
+        return targetDeadline;
+    }
 
-  /**
-   * Sets target deadline.
-   *
-   * @param targetDeadline the target deadline
-   */
-  public void setTargetDeadline(long targetDeadline)
-  {
-    this.targetDeadline = targetDeadline;
-  }
+    /**
+     * Sets target deadline.
+     *
+     * @param targetDeadline the target deadline
+     */
+    public void setTargetDeadline(long targetDeadline) {
+        this.targetDeadline = targetDeadline;
+    }
 }

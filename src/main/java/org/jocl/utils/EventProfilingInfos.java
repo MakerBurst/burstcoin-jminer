@@ -24,70 +24,63 @@ package org.jocl.utils;
 
 import org.jocl.cl_event;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_PROFILING_COMMAND_END;
+import static org.jocl.CL.CL_PROFILING_COMMAND_QUEUED;
+import static org.jocl.CL.CL_PROFILING_COMMAND_START;
+import static org.jocl.CL.CL_PROFILING_COMMAND_SUBMIT;
 
 /**
  * Utility methods for obtaining profiling information about cl_event objects.
  */
-public class EventProfilingInfos
-{
-  /**
-   * The device counter, in nanoseconds, when the command of the given event was queued.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static long getCommandQueued(cl_event event)
-  {
-    return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
-                         CL_PROFILING_COMMAND_QUEUED);
-  }
+public class EventProfilingInfos {
+    /**
+     * The device counter, in nanoseconds, when the command of the given event was queued.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static long getCommandQueued(cl_event event) {
+        return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
+                CL_PROFILING_COMMAND_QUEUED);
+    }
 
-  /**
-   * The device counter, in nanoseconds, when the command of the given event was submitted.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static long getCommandSubmit(cl_event event)
-  {
-    return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
-                         CL_PROFILING_COMMAND_SUBMIT);
-  }
+    /**
+     * The device counter, in nanoseconds, when the command of the given event was submitted.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static long getCommandSubmit(cl_event event) {
+        return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
+                CL_PROFILING_COMMAND_SUBMIT);
+    }
 
-  /**
-   * The device counter, in nanoseconds, when the command of the given event started execution.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static long getCommandStart(cl_event event)
-  {
-    return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
-                         CL_PROFILING_COMMAND_START);
-  }
+    /**
+     * The device counter, in nanoseconds, when the command of the given event started execution.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static long getCommandStart(cl_event event) {
+        return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
+                CL_PROFILING_COMMAND_START);
+    }
 
-  /**
-   * The device counter, in nanoseconds, when the command of the given event finished execution.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static long getCommandEnd(cl_event event)
-  {
-    return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
-                         CL_PROFILING_COMMAND_END);
-  }
+    /**
+     * The device counter, in nanoseconds, when the command of the given event finished execution.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static long getCommandEnd(cl_event event) {
+        return Infos.getLong(Infos.FOR_EVENT_PROFILING, event,
+                CL_PROFILING_COMMAND_END);
+    }
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private EventProfilingInfos()
-  {
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private EventProfilingInfos() {
 
-  }
+    }
 }

@@ -25,29 +25,23 @@ package burstcoin.jminer.core.network.model;
 
 import java.io.Serializable;
 
-public class ResponseError
-  implements Serializable
-{
-  private int errorCode;
-  private String errorDescription;
+public class ResponseError implements Serializable {
+    private int errorCode;
+    private String errorDescription;
 
-  protected ResponseError()
-  {
-  }
+    protected ResponseError() {
+    }
 
-  public ResponseError(int errorCode, String errorDescription)
-  {
-    this.errorCode = errorCode;
-    this.errorDescription = errorDescription;
-  }
+    public ResponseError(int errorCode, String errorDescription) {
+        this.errorCode = errorCode;
+        this.errorDescription = errorDescription;
+    }
 
-  public int getErrorCode()
-  {
-    return errorCode;
-  }
+    public int getErrorCode() {
+        return errorCode;
+    }
 
-  public String getErrorDescription()
-  {
-    return errorDescription;
-  }
+    public String getErrorDescription() {
+        return errorDescription;
+    }
 }

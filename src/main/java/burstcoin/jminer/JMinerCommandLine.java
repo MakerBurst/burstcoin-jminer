@@ -48,294 +48,253 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 
-public class JMinerCommandLine
-  implements CommandLineRunner
-{
-  private static final Logger LOG = LoggerFactory.getLogger(JMinerCommandLine.class);
+public class JMinerCommandLine implements CommandLineRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(JMinerCommandLine.class);
 
-  private static final int NUMBER_OF_PROGRESS_LOGS_PER_ROUND = CoreProperties.getReadProgressPerRound();
+    private static final int NUMBER_OF_PROGRESS_LOGS_PER_ROUND = CoreProperties.getReadProgressPerRound();
 
-  private static final int SIZE_DIVISOR = CoreProperties.isByteUnitDecimal() ? 1000 : 1024;
-  private static final String T_UNIT = CoreProperties.isByteUnitDecimal() ? "TB" : "TiB";
-  private static final String G_UNIT = CoreProperties.isByteUnitDecimal() ? "GB" : "GiB";
-  private static final String M_UNIT = CoreProperties.isByteUnitDecimal() ? "MB" : "MiB";
+    private static final int SIZE_DIVISOR = CoreProperties.isByteUnitDecimal() ? 1000 : 1024;
+    private static final String T_UNIT = CoreProperties.isByteUnitDecimal() ? "TB" : "TiB";
+    private static final String G_UNIT = CoreProperties.isByteUnitDecimal() ? "GB" : "GiB";
+    private static final String M_UNIT = CoreProperties.isByteUnitDecimal() ? "MB" : "MiB";
 
-  private static long blockNumber;
-  private static int progressLogStep;
-  private static long previousRemainingCapacity = 0;
-  private static long previousElapsedTime = 0;
+    private static long blockNumber;
+    private static int progressLogStep;
+    private static long previousRemainingCapacity = 0;
+    private static long previousElapsedTime = 0;
 
-  private ConfigurableApplicationContext context;
+    private ConfigurableApplicationContext context;
 
-  public JMinerCommandLine(ConfigurableApplicationContext context)
-  {
-    this.context = context;
-  }
+    public JMinerCommandLine(ConfigurableApplicationContext context) {
+        this.context = context;
+    }
 
-  @Override
-  public void run(String... args)
-    throws Exception
-  {
-    initApplicationListeners();
-
-    LOG.info("-------------------------------------------------------");
-    LOG.info("                            Burstcoin (BURST)");
-    LOG.info("            __         __   GPU assisted PoC-Miner");
-    LOG.info("           |__| _____ |__| ____   ___________ ");
-    LOG.info("   version |  |/     \\|  |/    \\_/ __ \\_  __ \\");
-    LOG.info("    0.4.10 |  |  Y Y  \\  |   |  \\  ___/|  | \\/");
-    LOG.info("       /\\__|  |__|_|  /__|___|  /\\___  >__| ");
-    LOG.info("       \\______|     \\/        \\/     \\/");
-    LOG.info("      mining engine: BURST-LUXE-RED2-G6JW-H4HG5");
-    LOG.info("     openCL checker: BURST-QHCJ-9HB5-PTGC-5Q8J9");
-
-    Network network = context.getBean(Network.class);
-    network.checkPoolInfo();
-    network.startMining();
-  }
-
-  private void initApplicationListeners()
-  {
-    context.addApplicationListener(new ApplicationListener<RoundFinishedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(RoundFinishedEvent event)
-      {
-        previousRemainingCapacity = 0;
-        previousElapsedTime = 0;
-
-        long s = event.getRoundTime() / 1000;
-        long ms = event.getRoundTime() % 1000;
-
-        String bestDeadline = Long.MAX_VALUE == event.getBestCommittedDeadline() ? "N/A" : String.valueOf(event.getBestCommittedDeadline());
-        LOG.info("FINISH block '" + event.getBlockNumber() + "', "
-                 + "best deadline '" + bestDeadline + "', "
-                 + "round time '" + s + "s " + ms + "ms'");
-      }
-    });
-
-    context.addApplicationListener(new ApplicationListener<RoundStoppedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(RoundStoppedEvent event)
-      {
-        previousRemainingCapacity = 0;
-        previousElapsedTime = 0;
-
-        long s = event.getElapsedTime() / 1000;
-        long ms = event.getElapsedTime() % 1000;
-
-        BigDecimal totalCapacity = new BigDecimal(event.getCapacity());
-        BigDecimal factor = BigDecimal.ONE.divide(totalCapacity, MathContext.DECIMAL32);
-        BigDecimal progress = factor.multiply(new BigDecimal(event.getCapacity() - event.getRemainingCapacity()));
-        int percentage = (int) Math.ceil(progress.doubleValue() * 100);
-        percentage = percentage > 100 ? 100 : percentage;
-
-        String bestDeadline = Long.MAX_VALUE == event.getBestCommittedDeadline() ? "N/A" : String.valueOf(event.getBestCommittedDeadline());
-        LOG.info("STOP block '" + event.getBlockNumber() + "', " + String.valueOf(percentage) + "% done, "
-                 + "best deadline '" + bestDeadline + "', "
-                 + "elapsed time '" + s + "s " + ms + "ms'");
-      }
-    });
-
-    context.addApplicationListener(new ApplicationListener<NetworkLastWinnerEvent>()
-    {
-      @Override
-      public void onApplicationEvent(NetworkLastWinnerEvent event)
-      {
-        if(blockNumber - 1 == event.getLastBlockNumber())
-        {
-          LOG.info("      winner block '" + event.getLastBlockNumber() + "', '" + event.getWinner() + "'");
-        }
-        else
-        {
-          LOG.error("Error: NetworkLastWinnerEvent for block: " + event.getLastBlockNumber() + " is outdated!");
-        }
-      }
-    });
-
-    context.addApplicationListener(new ApplicationListener<NetworkStateChangeEvent>()
-    {
-      @Override
-      public void onApplicationEvent(NetworkStateChangeEvent event)
-      {
-        blockNumber = event.getBlockNumber();
-      }
-    });
-
-    context.addApplicationListener(new ApplicationListener<RoundStartedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(RoundStartedEvent event)
-      {
-        progressLogStep = NUMBER_OF_PROGRESS_LOGS_PER_ROUND;
+    @Override
+    public void run(String... args)
+            throws Exception {
+        initApplicationListeners();
 
         LOG.info("-------------------------------------------------------");
-        LOG.info("START block '" + event.getBlockNumber() + "', "
-                 + "scoopNumber '" + event.getScoopNumber() + "', "
-                 + "capacity '" + event.getCapacity() / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR + " " + G_UNIT + "'"
-                );
-        String target = event.getTargetDeadline() == Long.MAX_VALUE ? "N/A" : String.valueOf(event.getTargetDeadline());
-        LOG.info("      targetDeadline '" + target + "', " + "baseTarget '" + String.valueOf(event.getBaseTarget()) + "'");
-      }
-    });
+        LOG.info("                            Burstcoin (BURST)");
+        LOG.info("            __         __   GPU assisted PoC-Miner");
+        LOG.info("           |__| _____ |__| ____   ___________ ");
+        LOG.info("   version |  |/     \\|  |/    \\_/ __ \\_  __ \\");
+        LOG.info("    0.4.10 |  |  Y Y  \\  |   |  \\  ___/|  | \\/");
+        LOG.info("       /\\__|  |__|_|  /__|___|  /\\___  >__| ");
+        LOG.info("       \\______|     \\/        \\/     \\/");
+        LOG.info("      mining engine: BURST-LUXE-RED2-G6JW-H4HG5");
+        LOG.info("     openCL checker: BURST-QHCJ-9HB5-PTGC-5Q8J9");
 
-    context.addApplicationListener(new ApplicationListener<ReaderProgressChangedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(ReaderProgressChangedEvent event)
-      {
-        if(NUMBER_OF_PROGRESS_LOGS_PER_ROUND > 0)
-        {
-          long logStepCapacity = event.getCapacity() / NUMBER_OF_PROGRESS_LOGS_PER_ROUND;
+        Network network = context.getBean(Network.class);
+        network.checkPoolInfo();
+        network.startMining();
+    }
 
-          if(event.getRemainingCapacity() < logStepCapacity * progressLogStep || event.getRemainingCapacity() == 0)
-          {
-            progressLogStep--;
+    private void initApplicationListeners() {
+        context.addApplicationListener(new ApplicationListener<RoundFinishedEvent>() {
+            @Override
+            public void onApplicationEvent(RoundFinishedEvent event) {
+                previousRemainingCapacity = 0;
+                previousElapsedTime = 0;
 
-            BigDecimal totalCapacity = new BigDecimal(event.getCapacity());
-            BigDecimal factor = BigDecimal.ONE.divide(totalCapacity, MathContext.DECIMAL32);
-            BigDecimal progress = factor.multiply(new BigDecimal(event.getCapacity() - event.getRemainingCapacity()));
-            int percentage = (int) Math.ceil(progress.doubleValue() * 100);
-            percentage = percentage > 100 ? 100 : percentage;
+                long s = event.getRoundTime() / 1000;
+                long ms = event.getRoundTime() % 1000;
 
-            // calculate capacity
-            long effMBPerSec = 0;
-            if(previousRemainingCapacity > 0)
-            {
-              long effDoneBytes = previousRemainingCapacity - event.getRemainingCapacity();
-
-              // calculate current reading speed (since last info)
-              long elapsedTime = event.getElapsedTime() - previousElapsedTime;
-              long effBytesPerMs = (effDoneBytes / 4096) / (elapsedTime == 0 /*do not divide by zero*/ ? 1 : elapsedTime);
-              effMBPerSec = (effBytesPerMs * 1000) / SIZE_DIVISOR / SIZE_DIVISOR;
+                String bestDeadline = Long.MAX_VALUE == event.getBestCommittedDeadline() ? "N/A" : String.valueOf(event.getBestCommittedDeadline());
+                LOG.info("FINISH block '" + event.getBlockNumber() + "', "
+                        + "best deadline '" + bestDeadline + "', "
+                        + "round time '" + s + "s " + ms + "ms'");
             }
+        });
 
-            // calculate capacity
-            long doneBytes = event.getCapacity() - event.getRemainingCapacity();
-            long doneTB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR;
-            long doneGB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR % SIZE_DIVISOR;
+        context.addApplicationListener(new ApplicationListener<RoundStoppedEvent>() {
+            @Override
+            public void onApplicationEvent(RoundStoppedEvent event) {
+                previousRemainingCapacity = 0;
+                previousElapsedTime = 0;
 
-            // calculate reading speed (average)
-            long averageBytesPerMs = (doneBytes / 4096) / event.getElapsedTime();
-            long averageMBPerSec = (averageBytesPerMs * 1000) / SIZE_DIVISOR / SIZE_DIVISOR;
+                long s = event.getElapsedTime() / 1000;
+                long ms = event.getElapsedTime() % 1000;
 
-            previousRemainingCapacity = event.getRemainingCapacity();
-            previousElapsedTime = event.getElapsedTime();
+                BigDecimal totalCapacity = new BigDecimal(event.getCapacity());
+                BigDecimal factor = BigDecimal.ONE.divide(totalCapacity, MathContext.DECIMAL32);
+                BigDecimal progress = factor.multiply(new BigDecimal(event.getCapacity() - event.getRemainingCapacity()));
+                int percentage = (int) Math.ceil(progress.doubleValue() * 100);
+                percentage = percentage > 100 ? 100 : percentage;
 
-            LOG.info(
-              String.valueOf(percentage) + "% done (" + doneTB + T_UNIT + " " + doneGB + G_UNIT + "), avg.'" + averageMBPerSec + " " + M_UNIT + "/s'" +
-              (effMBPerSec > 0 ? ", eff.'" + effMBPerSec + " " + M_UNIT + "/s'" : ""));
-          }
-        }
-      }
-    });
+                String bestDeadline = Long.MAX_VALUE == event.getBestCommittedDeadline() ? "N/A" : String.valueOf(event.getBestCommittedDeadline());
+                LOG.info("STOP block '" + event.getBlockNumber() + "', " + String.valueOf(percentage) + "% done, "
+                        + "best deadline '" + bestDeadline + "', "
+                        + "elapsed time '" + s + "s " + ms + "ms'");
+            }
+        });
 
-    context.addApplicationListener(new ApplicationListener<RoundSingleResultEvent>()
-    {
-      @Override
-      public void onApplicationEvent(RoundSingleResultEvent event)
-      {
-        LOG.info("dl '" + event.getCalculatedDeadline() + "' send (" + (event.isPoolMining() ? "pool" : "solo") + ") [nonce '"+event.getNonce().toString()+"']");
-      }
-    });
+        context.addApplicationListener(new ApplicationListener<NetworkLastWinnerEvent>() {
+            @Override
+            public void onApplicationEvent(NetworkLastWinnerEvent event) {
+                if (blockNumber - 1 == event.getLastBlockNumber()) {
+                    LOG.info("      winner block '" + event.getLastBlockNumber() + "', '" + event.getWinner() + "'");
+                } else {
+                    LOG.error("Error: NetworkLastWinnerEvent for block: " + event.getLastBlockNumber() + " is outdated!");
+                }
+            }
+        });
 
-    context.addApplicationListener(new ApplicationListener<RoundSingleResultSkippedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(RoundSingleResultSkippedEvent event)
-      {
-        LOG.info("dl '" + event.getCalculatedDeadline() + "' > '" + event.getTargetDeadline() + "' skipped");
-      }
-    });
+        context.addApplicationListener(new ApplicationListener<NetworkStateChangeEvent>() {
+            @Override
+            public void onApplicationEvent(NetworkStateChangeEvent event) {
+                blockNumber = event.getBlockNumber();
+            }
+        });
 
-    context.addApplicationListener(new ApplicationListener<NetworkResultConfirmedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(NetworkResultConfirmedEvent event)
-      {
-        LOG.info("dl '" + event.getDeadline() + "' confirmed!  [ " + getDeadlineTime(event.getDeadline()) + " ]");
-      }
-    });
+        context.addApplicationListener(new ApplicationListener<RoundStartedEvent>() {
+            @Override
+            public void onApplicationEvent(RoundStartedEvent event) {
+                progressLogStep = NUMBER_OF_PROGRESS_LOGS_PER_ROUND;
 
-    context.addApplicationListener(new ApplicationListener<NetworkResultErrorEvent>()
-    {
-      @Override
-      public void onApplicationEvent(NetworkResultErrorEvent event)
-      {
-        LOG.info("dl '" + event.getCalculatedDeadline() + "' NOT confirmed!  [ " + getDeadlineTime(event.getCalculatedDeadline()) + " ]");
-        LOG.debug("strange dl result '" + event.getStrangeDeadline() + "', "
-                  + "calculated '" + (event.getCalculatedDeadline() > 0 ? event.getCalculatedDeadline() : "N/A") + "' "
-                  + "block '" + event.getBlockNumber() + "' nonce '" + event.getNonce() + "'");
-      }
-    });
+                LOG.info("-------------------------------------------------------");
+                LOG.info("START block '" + event.getBlockNumber() + "', "
+                        + "scoopNumber '" + event.getScoopNumber() + "', "
+                        + "capacity '" + event.getCapacity() / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR + " " + G_UNIT + "'"
+                );
+                String target = event.getTargetDeadline() == Long.MAX_VALUE ? "N/A" : String.valueOf(event.getTargetDeadline());
+                LOG.info("      targetDeadline '" + target + "', " + "baseTarget '" + String.valueOf(event.getBaseTarget()) + "'");
+            }
+        });
 
-    context.addApplicationListener(new ApplicationListener<ReaderCorruptFileEvent>()
-    {
-      @Override
-      public void onApplicationEvent(ReaderCorruptFileEvent event)
-      {
-        LOG.debug("strange dl source '" + event.getFilePath() + "'");
-        LOG.debug("strange dl file chunks '" + event.getNumberOfChunks() + "', "
-                  + "parts per chunk '" + event.getNumberOfParts() + "', "
-                  + "block '" + event.getBlockNumber() + "'");
-      }
-    });
+        context.addApplicationListener(new ApplicationListener<ReaderProgressChangedEvent>() {
+            @Override
+            public void onApplicationEvent(ReaderProgressChangedEvent event) {
+                if (NUMBER_OF_PROGRESS_LOGS_PER_ROUND > 0) {
+                    long logStepCapacity = event.getCapacity() / NUMBER_OF_PROGRESS_LOGS_PER_ROUND;
 
-    context.addApplicationListener(new ApplicationListener<ReaderDriveFinishEvent>()
-    {
-      @Override
-      public void onApplicationEvent(ReaderDriveFinishEvent event)
-      {
-        if(blockNumber == event.getBlockNumber())
-        {
-          // calculate capacity
-          long doneBytes = event.getSize();
-          long doneTB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR;
-          long doneGB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR % SIZE_DIVISOR;
+                    if (event.getRemainingCapacity() < logStepCapacity * progressLogStep || event.getRemainingCapacity() == 0) {
+                        progressLogStep--;
 
-          long s = event.getTime() / 1000;
-          long ms = event.getTime() % 1000;
+                        BigDecimal totalCapacity = new BigDecimal(event.getCapacity());
+                        BigDecimal factor = BigDecimal.ONE.divide(totalCapacity, MathContext.DECIMAL32);
+                        BigDecimal progress = factor.multiply(new BigDecimal(event.getCapacity() - event.getRemainingCapacity()));
+                        int percentage = (int) Math.ceil(progress.doubleValue() * 100);
+                        percentage = percentage > 100 ? 100 : percentage;
 
-          LOG.info("read '" + event.getDirectory() + "' (" + doneTB + T_UNIT + " " + doneGB + G_UNIT + ") in '" + s + "s " + ms + "ms'");
-        }
-      }
-    });
+                        // calculate capacity
+                        long effMBPerSec = 0;
+                        if (previousRemainingCapacity > 0) {
+                            long effDoneBytes = previousRemainingCapacity - event.getRemainingCapacity();
 
-    context.addApplicationListener(new ApplicationListener<ReaderDriveInterruptedEvent>()
-    {
-      @Override
-      public void onApplicationEvent(ReaderDriveInterruptedEvent event)
-      {
-        LOG.info("stopped '" + event.getDirectory() + "' for block '" + event.getBlockNumber() + "'.");
-      }
-    });
+                            // calculate current reading speed (since last info)
+                            long elapsedTime = event.getElapsedTime() - previousElapsedTime;
+                            long effBytesPerMs = (effDoneBytes / 4096) / (elapsedTime == 0 /*do not divide by zero*/ ? 1 : elapsedTime);
+                            effMBPerSec = (effBytesPerMs * 1000) / SIZE_DIVISOR / SIZE_DIVISOR;
+                        }
 
-    context.addApplicationListener(new ApplicationListener<NetworkPoolInfoEvent>()
-    {
-      @Override
-      public void onApplicationEvent(NetworkPoolInfoEvent event)
-      {
-        String value = event.getPoolBalanceNQT();
-        String amount = value.length() > 8 ? value.substring(0, value.length() - 8) : value;
-        value = event.getPoolForgedBalanceNQT();
-        String totalForget = value.length() > 8 ? value.substring(0, value.length() - 8) : value;
-        LOG.info("-------------------------------------------------------");
-        LOG.info("POOL account '" + event.getPoolAccountRS() + "', assigned miners '" + event.getPoolNumberOfMiningAccounts() + "'");
-        LOG.info("     balance '" + amount + " BURST', total mined '" + totalForget + " BURST'");
-      }
-    });
-  }
+                        // calculate capacity
+                        long doneBytes = event.getCapacity() - event.getRemainingCapacity();
+                        long doneTB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR;
+                        long doneGB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR % SIZE_DIVISOR;
 
-  private String getDeadlineTime(Long calculatedDeadline)
-  {
-    long sec = calculatedDeadline;
-    long min = sec / 60;
-    sec = sec % 60;
-    long hours = min / 60;
-    min = min % 60;
-    long days = hours / 24;
-    hours = hours % 24;
-    return days + "d " + hours + "h " + min + "m " + sec + "s";
-  }
+                        // calculate reading speed (average)
+                        long averageBytesPerMs = (doneBytes / 4096) / event.getElapsedTime();
+                        long averageMBPerSec = (averageBytesPerMs * 1000) / SIZE_DIVISOR / SIZE_DIVISOR;
+
+                        previousRemainingCapacity = event.getRemainingCapacity();
+                        previousElapsedTime = event.getElapsedTime();
+
+                        LOG.info(
+                                String.valueOf(percentage) + "% done (" + doneTB + T_UNIT + " " + doneGB + G_UNIT + "), avg.'" + averageMBPerSec + " " + M_UNIT + "/s'" +
+                                        (effMBPerSec > 0 ? ", eff.'" + effMBPerSec + " " + M_UNIT + "/s'" : ""));
+                    }
+                }
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<RoundSingleResultEvent>() {
+            @Override
+            public void onApplicationEvent(RoundSingleResultEvent event) {
+                LOG.info("dl '" + event.getCalculatedDeadline() + "' send (" + (event.isPoolMining() ? "pool" : "solo") + ") [nonce '" + event.getNonce().toString() + "']");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<RoundSingleResultSkippedEvent>() {
+            @Override
+            public void onApplicationEvent(RoundSingleResultSkippedEvent event) {
+                LOG.info("dl '" + event.getCalculatedDeadline() + "' > '" + event.getTargetDeadline() + "' skipped");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<NetworkResultConfirmedEvent>() {
+            @Override
+            public void onApplicationEvent(NetworkResultConfirmedEvent event) {
+                LOG.info("dl '" + event.getDeadline() + "' confirmed!  [ " + getDeadlineTime(event.getDeadline()) + " ]");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<NetworkResultErrorEvent>() {
+            @Override
+            public void onApplicationEvent(NetworkResultErrorEvent event) {
+                LOG.info("dl '" + event.getCalculatedDeadline() + "' NOT confirmed!  [ " + getDeadlineTime(event.getCalculatedDeadline()) + " ]");
+                LOG.debug("strange dl result '" + event.getStrangeDeadline() + "', "
+                        + "calculated '" + (event.getCalculatedDeadline() > 0 ? event.getCalculatedDeadline() : "N/A") + "' "
+                        + "block '" + event.getBlockNumber() + "' nonce '" + event.getNonce() + "'");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<ReaderCorruptFileEvent>() {
+            @Override
+            public void onApplicationEvent(ReaderCorruptFileEvent event) {
+                LOG.debug("strange dl source '" + event.getFilePath() + "'");
+                LOG.debug("strange dl file chunks '" + event.getNumberOfChunks() + "', "
+                        + "parts per chunk '" + event.getNumberOfParts() + "', "
+                        + "block '" + event.getBlockNumber() + "'");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<ReaderDriveFinishEvent>() {
+            @Override
+            public void onApplicationEvent(ReaderDriveFinishEvent event) {
+                if (blockNumber == event.getBlockNumber()) {
+                    // calculate capacity
+                    long doneBytes = event.getSize();
+                    long doneTB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR;
+                    long doneGB = doneBytes / SIZE_DIVISOR / SIZE_DIVISOR / SIZE_DIVISOR % SIZE_DIVISOR;
+
+                    long s = event.getTime() / 1000;
+                    long ms = event.getTime() % 1000;
+
+                    LOG.info("read '" + event.getDirectory() + "' (" + doneTB + T_UNIT + " " + doneGB + G_UNIT + ") in '" + s + "s " + ms + "ms'");
+                }
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<ReaderDriveInterruptedEvent>() {
+            @Override
+            public void onApplicationEvent(ReaderDriveInterruptedEvent event) {
+                LOG.info("stopped '" + event.getDirectory() + "' for block '" + event.getBlockNumber() + "'.");
+            }
+        });
+
+        context.addApplicationListener(new ApplicationListener<NetworkPoolInfoEvent>() {
+            @Override
+            public void onApplicationEvent(NetworkPoolInfoEvent event) {
+                String value = event.getPoolBalanceNQT();
+                String amount = value.length() > 8 ? value.substring(0, value.length() - 8) : value;
+                value = event.getPoolForgedBalanceNQT();
+                String totalForget = value.length() > 8 ? value.substring(0, value.length() - 8) : value;
+                LOG.info("-------------------------------------------------------");
+                LOG.info("POOL account '" + event.getPoolAccountRS() + "', assigned miners '" + event.getPoolNumberOfMiningAccounts() + "'");
+                LOG.info("     balance '" + amount + " BURST', total mined '" + totalForget + " BURST'");
+            }
+        });
+    }
+
+    private String getDeadlineTime(Long calculatedDeadline) {
+        long sec = calculatedDeadline;
+        long min = sec / 60;
+        sec = sec % 60;
+        long hours = min / 60;
+        min = min % 60;
+        long days = hours / 24;
+        hours = hours % 24;
+        return days + "d " + hours + "h " + min + "m " + sec + "s";
+    }
 }

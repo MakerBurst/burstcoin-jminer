@@ -39,128 +39,103 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
-public class NetworkRequestLastWinnerTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestLastWinnerTask.class);
+public class NetworkRequestLastWinnerTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestLastWinnerTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  // data
-  private long blockNumber; // updated on new round
-  private String server;
-  private long connectionTimeout;
-  private int winnerRetriesOnAsync;
-  private long winnerRetryIntervalInMs;
+    // data
+    private long blockNumber; // updated on new round
+    private String server;
+    private long connectionTimeout;
+    private int winnerRetriesOnAsync;
+    private long winnerRetryIntervalInMs;
 
-  public void init(String server, long blockNumber, long connectionTimeout, int winnerRetriesOnAsync, long winnerRetryIntervalInMs)
-  {
-    this.server = server;
-    this.blockNumber = blockNumber;
-    this.connectionTimeout = connectionTimeout;
+    public void init(String server, long blockNumber, long connectionTimeout, int winnerRetriesOnAsync, long winnerRetryIntervalInMs) {
+        this.server = server;
+        this.blockNumber = blockNumber;
+        this.connectionTimeout = connectionTimeout;
 
-    this.winnerRetriesOnAsync = winnerRetriesOnAsync;
-    this.winnerRetryIntervalInMs = winnerRetryIntervalInMs;
-  }
-
-  @Override
-  public void run()
-  {
-    Block lastBlock = getLastBlock();
-    if(lastBlock != null)
-    {
-      publisher.publishEvent(new NetworkLastWinnerEvent(this, lastBlock.getHeight(), lastBlock.getGeneratorRS()));
+        this.winnerRetriesOnAsync = winnerRetriesOnAsync;
+        this.winnerRetryIntervalInMs = winnerRetryIntervalInMs;
     }
-    else
-    {
-      // todo event
-      LOG.info("      last winner 'N/A', walletServer out of sync.");
-    }
-  }
 
-  private Block getLastBlock()
-  {
-    Block lastBlock = null;
-    BlockchainStatus blockChainStatus = getBlockChainStatus();
-    int retries = 0;
-    if(blockChainStatus != null)
-    {
-      lastBlock = getBlock(blockChainStatus.getLastBlock());
-      if(lastBlock != null)
-      {
-        while(blockNumber - 1 /*from pool*/ != lastBlock.getHeight()  /* from walletServer*/ && retries < winnerRetriesOnAsync)
-        {
-          retries++;
-
-          if(retries == winnerRetriesOnAsync)
-          {
-            LOG.debug("lastBlock from walletServer outdated, last retry in " + winnerRetryIntervalInMs + "ms");
-          }
-          else
-          {
-            LOG.debug("lastBlock from walletServer outdated, retry-" + retries + " in " + winnerRetryIntervalInMs + "ms");
-          }
-
-          try
-          {
-            Thread.sleep(winnerRetryIntervalInMs);
-          }
-          catch(InterruptedException e)
-          {
-            e.printStackTrace();
-          }
-          blockChainStatus = getBlockChainStatus();
-          lastBlock = getBlock(blockChainStatus.getLastBlock());
+    @Override
+    public void run() {
+        Block lastBlock = getLastBlock();
+        if (lastBlock != null) {
+            publisher.publishEvent(new NetworkLastWinnerEvent(this, lastBlock.getHeight(), lastBlock.getGeneratorRS()));
+        } else {
+            // todo event
+            LOG.info("      last winner 'N/A', walletServer out of sync.");
         }
-      }
     }
 
-    return retries > 0 && winnerRetriesOnAsync == retries ? null : lastBlock;
-  }
+    private Block getLastBlock() {
+        Block lastBlock = null;
+        BlockchainStatus blockChainStatus = getBlockChainStatus();
+        int retries = 0;
+        if (blockChainStatus != null) {
+            lastBlock = getBlock(blockChainStatus.getLastBlock());
+            if (lastBlock != null) {
+                while (blockNumber - 1 /*from pool*/ != lastBlock.getHeight()  /* from walletServer*/ && retries < winnerRetriesOnAsync) {
+                    retries++;
 
-  private BlockchainStatus getBlockChainStatus()
-  {
-    BlockchainStatus blockchainStatus = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlockchainStatus")
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+                    if (retries == winnerRetriesOnAsync) {
+                        LOG.debug("lastBlock from walletServer outdated, last retry in " + winnerRetryIntervalInMs + "ms");
+                    } else {
+                        LOG.debug("lastBlock from walletServer outdated, retry-" + retries + " in " + winnerRetryIntervalInMs + "ms");
+                    }
 
-      blockchainStatus = objectMapper.readValue(response.getContentAsString(), BlockchainStatus.class);
+                    try {
+                        Thread.sleep(winnerRetryIntervalInMs);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    blockChainStatus = getBlockChainStatus();
+                    lastBlock = getBlock(blockChainStatus.getLastBlock());
+                }
+            }
+        }
 
+        return retries > 0 && winnerRetriesOnAsync == retries ? null : lastBlock;
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getBlockchainStatus' from 'walletServer' to find last winner.");
-    }
-    return blockchainStatus;
-  }
 
-  private Block getBlock(String blockId)
-  {
-    Block block = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlock&block=" + blockId)
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+    private BlockchainStatus getBlockChainStatus() {
+        BlockchainStatus blockchainStatus = null;
+        try {
+            ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlockchainStatus")
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
 
-      String contentAsString = response.getContentAsString();
+            blockchainStatus = objectMapper.readValue(response.getContentAsString(), BlockchainStatus.class);
 
-      block = objectMapper.readValue(contentAsString, Block.class);
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getBlockchainStatus' from 'walletServer' to find last winner.");
+        }
+        return blockchainStatus;
     }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to 'getBlock' to find last winner.");
+
+    private Block getBlock(String blockId) {
+        Block block = null;
+        try {
+            ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlock&block=" + blockId)
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
+
+            String contentAsString = response.getContentAsString();
+
+            block = objectMapper.readValue(contentAsString, Block.class);
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to 'getBlock' to find last winner.");
+        }
+        return block;
     }
-    return block;
-  }
 }

@@ -27,84 +27,76 @@ import org.springframework.context.ApplicationEvent;
 /**
  * The type Round stopped event.
  */
-public class RoundStoppedEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private long bestCommittedDeadline;
+public class RoundStoppedEvent extends ApplicationEvent {
+    private long blockNumber;
+    private long bestCommittedDeadline;
 
-  private long capacity;
-  private long remainingCapacity;
-  private long elapsedTime;
+    private long capacity;
+    private long remainingCapacity;
+    private long elapsedTime;
 
-  /**
-   * Instantiates a new Round stopped event.
-   *
-   * @param blockNumber the block number
-   * @param bestCommittedDeadline the best committed deadline
-   * @param capacity the capacity
-   * @param remainingCapacity the remaining capacity
-   * @param elapsedTime the elapsed time
-   */
-  public RoundStoppedEvent(long blockNumber, long bestCommittedDeadline, long capacity, long remainingCapacity, long elapsedTime)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Round stopped event.
+     *
+     * @param blockNumber           the block number
+     * @param bestCommittedDeadline the best committed deadline
+     * @param capacity              the capacity
+     * @param remainingCapacity     the remaining capacity
+     * @param elapsedTime           the elapsed time
+     */
+    public RoundStoppedEvent(long blockNumber, long bestCommittedDeadline, long capacity, long remainingCapacity, long elapsedTime) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.bestCommittedDeadline = bestCommittedDeadline;
-    this.capacity = capacity;
-    this.remainingCapacity = remainingCapacity;
-    this.elapsedTime = elapsedTime;
-  }
+        this.blockNumber = blockNumber;
+        this.bestCommittedDeadline = bestCommittedDeadline;
+        this.capacity = capacity;
+        this.remainingCapacity = remainingCapacity;
+        this.elapsedTime = elapsedTime;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets best committed deadline.
-   *
-   * @return the best committed deadline
-   */
-  public long getBestCommittedDeadline()
-  {
-    return bestCommittedDeadline;
-  }
+    /**
+     * Gets best committed deadline.
+     *
+     * @return the best committed deadline
+     */
+    public long getBestCommittedDeadline() {
+        return bestCommittedDeadline;
+    }
 
-  /**
-   * Gets capacity.
-   *
-   * @return the capacity
-   */
-  public long getCapacity()
-  {
-    return capacity;
-  }
+    /**
+     * Gets capacity.
+     *
+     * @return the capacity
+     */
+    public long getCapacity() {
+        return capacity;
+    }
 
-  /**
-   * Gets remaining capacity.
-   *
-   * @return the remaining capacity
-   */
-  public long getRemainingCapacity()
-  {
-    return remainingCapacity;
-  }
+    /**
+     * Gets remaining capacity.
+     *
+     * @return the remaining capacity
+     */
+    public long getRemainingCapacity() {
+        return remainingCapacity;
+    }
 
-  /**
-   * Gets elapsed time.
-   *
-   * @return the elapsed time
-   */
-  public long getElapsedTime()
-  {
-    return elapsedTime;
-  }
+    /**
+     * Gets elapsed time.
+     *
+     * @return the elapsed time
+     */
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
 }
 

@@ -28,82 +28,74 @@ import org.springframework.context.ApplicationEvent;
 /**
  * fired after mining started
  */
-public class RoundStartedEvent
-  extends ApplicationEvent
-{
-  private long scoopNumber;
-  private long capacity;
-  private long targetDeadline;
-  private long baseTarget;
-  private long blockNumber;
+public class RoundStartedEvent extends ApplicationEvent {
+    private long scoopNumber;
+    private long capacity;
+    private long targetDeadline;
+    private long baseTarget;
+    private long blockNumber;
 
-  /**
-   * Instantiates a new Round started event.
-   *
-   * @param blockNumber the block number
-   * @param scoopNumber the scoop number
-   * @param capacity the capacity
-   * @param targetDeadline the target deadline
-   * @param baseTarget the base target
-   */
-  public RoundStartedEvent(long blockNumber, long scoopNumber, long capacity, long targetDeadline, long baseTarget)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Round started event.
+     *
+     * @param blockNumber    the block number
+     * @param scoopNumber    the scoop number
+     * @param capacity       the capacity
+     * @param targetDeadline the target deadline
+     * @param baseTarget     the base target
+     */
+    public RoundStartedEvent(long blockNumber, long scoopNumber, long capacity, long targetDeadline, long baseTarget) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.scoopNumber = scoopNumber;
-    this.capacity = capacity;
-    this.targetDeadline = targetDeadline;
-    this.baseTarget = baseTarget;
-  }
+        this.blockNumber = blockNumber;
+        this.scoopNumber = scoopNumber;
+        this.capacity = capacity;
+        this.targetDeadline = targetDeadline;
+        this.baseTarget = baseTarget;
+    }
 
-  /**
-   * Gets capacity.
-   *
-   * @return the capacity
-   */
-  public long getCapacity()
-  {
-    return capacity;
-  }
+    /**
+     * Gets capacity.
+     *
+     * @return the capacity
+     */
+    public long getCapacity() {
+        return capacity;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets scoop number.
-   *
-   * @return the scoop number
-   */
-  public long getScoopNumber()
-  {
-    return scoopNumber;
-  }
+    /**
+     * Gets scoop number.
+     *
+     * @return the scoop number
+     */
+    public long getScoopNumber() {
+        return scoopNumber;
+    }
 
-  /**
-   * Gets target deadline.
-   *
-   * @return the target deadline
-   */
-  public long getTargetDeadline()
-  {
-    return targetDeadline;
-  }
+    /**
+     * Gets target deadline.
+     *
+     * @return the target deadline
+     */
+    public long getTargetDeadline() {
+        return targetDeadline;
+    }
 
-  /**
-   * Gets base target.
-   *
-   * @return the base target
-   */
-  public long getBaseTarget()
-  {
-    return baseTarget;
-  }
+    /**
+     * Gets base target.
+     *
+     * @return the base target
+     */
+    public long getBaseTarget() {
+        return baseTarget;
+    }
 }

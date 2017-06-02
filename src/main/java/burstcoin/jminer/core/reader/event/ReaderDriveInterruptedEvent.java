@@ -27,27 +27,22 @@ import org.springframework.context.ApplicationEvent;
 /**
  * fired if read is interrupted on shutdown threadPool
  */
-public class ReaderDriveInterruptedEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private String directory;
+public class ReaderDriveInterruptedEvent extends ApplicationEvent {
+    private long blockNumber;
+    private String directory;
 
-  public ReaderDriveInterruptedEvent(long blockNumber, String directory)
-  {
-    super(blockNumber);
+    public ReaderDriveInterruptedEvent(long blockNumber, String directory) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.directory = directory;
-  }
+        this.blockNumber = blockNumber;
+        this.directory = directory;
+    }
 
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  public String getDirectory()
-  {
-    return directory;
-  }
+    public String getDirectory() {
+        return directory;
+    }
 }

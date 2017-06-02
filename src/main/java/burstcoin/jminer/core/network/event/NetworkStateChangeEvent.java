@@ -28,71 +28,64 @@ import org.springframework.context.ApplicationEvent;
  * The type Network state change event.
  */
 /* fired if a new block has started */
-public class NetworkStateChangeEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private byte[] generationSignature;
-  private long baseTarget;
+public class NetworkStateChangeEvent extends ApplicationEvent {
+    private long blockNumber;
+    private byte[] generationSignature;
+    private long baseTarget;
 
-  // targetDeadline provided via property or server in miningInfo (depends on solo/pool mining)
-  private long targetDeadline;
+    // targetDeadline provided via property or server in miningInfo (depends on solo/pool mining)
+    private long targetDeadline;
 
-  /**
-   * Instantiates a new Network state change event.
-   *
-   * @param blockNumber the block number
-   * @param baseTarget the base target
-   * @param generationSignature the generation signature
-   * @param targetDeadline the target deadline
-   */
-  public NetworkStateChangeEvent(long blockNumber, long baseTarget, byte[] generationSignature, long targetDeadline)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Network state change event.
+     *
+     * @param blockNumber         the block number
+     * @param baseTarget          the base target
+     * @param generationSignature the generation signature
+     * @param targetDeadline      the target deadline
+     */
+    public NetworkStateChangeEvent(long blockNumber, long baseTarget, byte[] generationSignature, long targetDeadline) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.baseTarget = baseTarget;
-    this.generationSignature = generationSignature;
-    this.targetDeadline = targetDeadline;
-  }
+        this.blockNumber = blockNumber;
+        this.baseTarget = baseTarget;
+        this.generationSignature = generationSignature;
+        this.targetDeadline = targetDeadline;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Get generation signature.
-   *
-   * @return the byte [ ]
-   */
-  public byte[] getGenerationSignature()
-  {
-    return generationSignature;
-  }
+    /**
+     * Get generation signature.
+     *
+     * @return the byte [ ]
+     */
+    public byte[] getGenerationSignature() {
+        return generationSignature;
+    }
 
-  /**
-   * Gets target deadline.
-   *
-   * @return the target deadline
-   */
-  public long getTargetDeadline()
-  {
-    return targetDeadline;
-  }
+    /**
+     * Gets target deadline.
+     *
+     * @return the target deadline
+     */
+    public long getTargetDeadline() {
+        return targetDeadline;
+    }
 
-  /**
-   * Gets base target.
-   *
-   * @return the base target
-   */
-  public long getBaseTarget()
-  {
-    return baseTarget;
-  }
+    /**
+     * Gets base target.
+     *
+     * @return the base target
+     */
+    public long getBaseTarget() {
+        return baseTarget;
+    }
 }

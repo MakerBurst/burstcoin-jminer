@@ -28,70 +28,63 @@ import org.springframework.context.ApplicationEvent;
 /**
  * The type Reader progress changed event.
  */
-public class ReaderProgressChangedEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private long capacity;
-  private long remainingCapacity;
-  private long elapsedTime;
+public class ReaderProgressChangedEvent extends ApplicationEvent {
+    private long blockNumber;
+    private long capacity;
+    private long remainingCapacity;
+    private long elapsedTime;
 
-  /**
-   * Instantiates a new Reader progress changed event.
-   *
-   * @param source the source
-   * @param blockNumber the block number
-   * @param capacity the capacity
-   * @param remainingCapacity the remaining capacity
-   * @param elapsedTime the elapsed time
-   */
-  public ReaderProgressChangedEvent(Reader source, long blockNumber, long capacity, long remainingCapacity, long elapsedTime)
-  {
-    super(source);
+    /**
+     * Instantiates a new Reader progress changed event.
+     *
+     * @param source            the source
+     * @param blockNumber       the block number
+     * @param capacity          the capacity
+     * @param remainingCapacity the remaining capacity
+     * @param elapsedTime       the elapsed time
+     */
+    public ReaderProgressChangedEvent(Reader source, long blockNumber, long capacity, long remainingCapacity, long elapsedTime) {
+        super(source);
 
-    this.blockNumber = blockNumber;
-    this.capacity = capacity;
-    this.remainingCapacity = remainingCapacity;
-    this.elapsedTime = elapsedTime;
-  }
+        this.blockNumber = blockNumber;
+        this.capacity = capacity;
+        this.remainingCapacity = remainingCapacity;
+        this.elapsedTime = elapsedTime;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets remaining capacity.
-   *
-   * @return the remaining capacity
-   */
-  public long getRemainingCapacity()
-  {
-    return remainingCapacity;
-  }
+    /**
+     * Gets remaining capacity.
+     *
+     * @return the remaining capacity
+     */
+    public long getRemainingCapacity() {
+        return remainingCapacity;
+    }
 
-  /**
-   * Gets capacity.
-   *
-   * @return the capacity
-   */
-  public long getCapacity()
-  {
-    return capacity;
-  }
+    /**
+     * Gets capacity.
+     *
+     * @return the capacity
+     */
+    public long getCapacity() {
+        return capacity;
+    }
 
-  /**
-   * Gets elapsed time.
-   *
-   * @return the elapsed time
-   */
-  public long getElapsedTime()
-  {
-    return elapsedTime;
-  }
+    /**
+     * Gets elapsed time.
+     *
+     * @return the elapsed time
+     */
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
 }

@@ -41,154 +41,125 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class Plots
-{
-  private static final Logger LOG = LoggerFactory.getLogger(Plots.class);
+public class Plots {
+    private static final Logger LOG = LoggerFactory.getLogger(Plots.class);
 
-  private Collection<PlotDrive> plotDrives;
-  private Map<BigInteger, Long> chunkPartStartNonces;
+    private Collection<PlotDrive> plotDrives;
+    private Map<BigInteger, Long> chunkPartStartNonces;
 
-  public Plots()
-  {
-    this(CoreProperties.getPlotPaths(), CoreProperties.getNumericAccountId(), CoreProperties.getChunkPartNonces());
-  }
-
-  public Plots(List<String> plotPaths, String numericAccountId, long chunkPartNonces)
-  {
-    plotDrives = new HashSet<>();
-    chunkPartStartNonces = new HashMap<>();
-    Map<String, Collection<Path>> plotFilesLookup = collectPlotFiles(plotPaths, numericAccountId);
-    for(Map.Entry<String, Collection<Path>> entry : plotFilesLookup.entrySet())
-    {
-      PlotDrive plotDrive = new PlotDrive(entry.getKey(), entry.getValue(), chunkPartNonces);
-      plotDrives.add(plotDrive);
-
-      int expectedSize = chunkPartStartNonces.size() + plotDrive.collectChunkPartStartNonces().size();
-      chunkPartStartNonces.putAll(plotDrive.collectChunkPartStartNonces());
-      if(expectedSize != chunkPartStartNonces.size())
-      {
-        LOG.error("possible duplicate/overlapping polt-file on drive '" + plotDrive.getDirectory()
-                  + "' please use 'https://bchain.info/BURST/tools/overlap' to check your plots.");
-      }
+    public Plots() {
+        this(CoreProperties.getPlotPaths(), CoreProperties.getNumericAccountId(), CoreProperties.getChunkPartNonces());
     }
-  }
 
-  /**
-   * Gets plot drives.
-   *
-   * @return the plot drives
-   */
-  public Collection<PlotDrive> getPlotDrives()
-  {
-    return plotDrives;
-  }
+    public Plots(List<String> plotPaths, String numericAccountId, long chunkPartNonces) {
+        plotDrives = new HashSet<>();
+        chunkPartStartNonces = new HashMap<>();
+        Map<String, Collection<Path>> plotFilesLookup = collectPlotFiles(plotPaths, numericAccountId);
+        for (Map.Entry<String, Collection<Path>> entry : plotFilesLookup.entrySet()) {
+            PlotDrive plotDrive = new PlotDrive(entry.getKey(), entry.getValue(), chunkPartNonces);
+            plotDrives.add(plotDrive);
 
-  private static Map<String, Collection<Path>> collectPlotFiles(List<String> plotDirectories, String numericAccountId)
-  {
-    Map<String, Collection<Path>> plotFilesLookup = new HashMap<>();
-    for(String plotDirectory : plotDirectories)
-    {
-      Path folderPath = Paths.get(plotDirectory);
-      try (DirectoryStream<Path> plotFilesStream = Files.newDirectoryStream(folderPath))
-      {
-        List<Path> plotFilePaths = new ArrayList<>();
-        for(Path plotFilePath : plotFilesStream)
-        {
-          if(plotFilePath.toString().contains(numericAccountId))
-          {
-            plotFilePaths.add(plotFilePath);
-          }
+            int expectedSize = chunkPartStartNonces.size() + plotDrive.collectChunkPartStartNonces().size();
+            chunkPartStartNonces.putAll(plotDrive.collectChunkPartStartNonces());
+            if (expectedSize != chunkPartStartNonces.size()) {
+                LOG.error("possible duplicate/overlapping polt-file on drive '" + plotDrive.getDirectory()
+                        + "' please use 'https://bchain.info/BURST/tools/overlap' to check your plots.");
+            }
         }
-        plotFilesLookup.put(plotDirectory, plotFilePaths);
-      }
-      catch(IOException | DirectoryIteratorException e)
-      {
-        LOG.error(e.getMessage());
-      }
     }
-    return plotFilesLookup;
-  }
 
-  /**
-   * Gets size.
-   *
-   * @return total number of bytes of all plotFiles
-   */
-  public long getSize()
-  {
-    long size = 0;
-    for(PlotDrive plotDrive : plotDrives)
-    {
-      size += plotDrive.getSize();
+    /**
+     * Gets plot drives.
+     *
+     * @return the plot drives
+     */
+    public Collection<PlotDrive> getPlotDrives() {
+        return plotDrives;
     }
-    return size;
-  }
 
-  /**
-   * Print plot files.
-   */
-  public void printPlotFiles()
-  {
-    for(PlotDrive plotDrive : getPlotDrives())
-    {
-      for(PlotFile plotFile : plotDrive.getPlotFiles())
-      {
-        System.out.println(plotFile.getFilePath());
-      }
-    }
-  }
-
-  /**
-   * Gets plot file by plot file start nonce.
-   *
-   * @param plotFileStartNonce the plot file start nonce
-   *
-   * @return the plot file by plot file start nonce
-   */
-  public PlotFile getPlotFileByPlotFileStartNonce(long plotFileStartNonce)
-  {
-    for(PlotDrive plotDrive : getPlotDrives())
-    {
-      for(PlotFile plotFile : plotDrive.getPlotFiles())
-      {
-        if(plotFile.getFilename().contains(String.valueOf(plotFileStartNonce)))
-        {
-          return plotFile;
+    private static Map<String, Collection<Path>> collectPlotFiles(List<String> plotDirectories, String numericAccountId) {
+        Map<String, Collection<Path>> plotFilesLookup = new HashMap<>();
+        for (String plotDirectory : plotDirectories) {
+            Path folderPath = Paths.get(plotDirectory);
+            try (DirectoryStream<Path> plotFilesStream = Files.newDirectoryStream(folderPath)) {
+                List<Path> plotFilePaths = new ArrayList<>();
+                for (Path plotFilePath : plotFilesStream) {
+                    if (plotFilePath.toString().contains(numericAccountId)) {
+                        plotFilePaths.add(plotFilePath);
+                    }
+                }
+                plotFilesLookup.put(plotDirectory, plotFilePaths);
+            } catch (IOException | DirectoryIteratorException e) {
+                LOG.error(e.getMessage());
+            }
         }
-      }
+        return plotFilesLookup;
     }
-    return null;
-  }
 
-  /**
-   * Gets chunk part start nonces.
-   *
-   * @return the chunk part start nonces
-   */
-  public Map<BigInteger, Long> getChunkPartStartNonces()
-  {
-    return chunkPartStartNonces;
-  }
-
-  /**
-   * Gets plot file by chunk part start nonce.
-   *
-   * @param chunkPartStartNonce the chunk part start nonce
-   *
-   * @return the plot file by chunk part start nonce
-   */
-  public PlotFile getPlotFileByChunkPartStartNonce(BigInteger chunkPartStartNonce)
-  {
-    for(PlotDrive plotDrive : getPlotDrives())
-    {
-      for(PlotFile plotFile : plotDrive.getPlotFiles())
-      {
-        if(plotFile.getChunkPartStartNonces().containsKey(chunkPartStartNonce))
-        {
-          return plotFile;
+    /**
+     * Gets size.
+     *
+     * @return total number of bytes of all plotFiles
+     */
+    public long getSize() {
+        long size = 0;
+        for (PlotDrive plotDrive : plotDrives) {
+            size += plotDrive.getSize();
         }
-      }
+        return size;
     }
-    return null;
-  }
+
+    /**
+     * Print plot files.
+     */
+    public void printPlotFiles() {
+        for (PlotDrive plotDrive : getPlotDrives()) {
+            for (PlotFile plotFile : plotDrive.getPlotFiles()) {
+                System.out.println(plotFile.getFilePath());
+            }
+        }
+    }
+
+    /**
+     * Gets plot file by plot file start nonce.
+     *
+     * @param plotFileStartNonce the plot file start nonce
+     * @return the plot file by plot file start nonce
+     */
+    public PlotFile getPlotFileByPlotFileStartNonce(long plotFileStartNonce) {
+        for (PlotDrive plotDrive : getPlotDrives()) {
+            for (PlotFile plotFile : plotDrive.getPlotFiles()) {
+                if (plotFile.getFilename().contains(String.valueOf(plotFileStartNonce))) {
+                    return plotFile;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets chunk part start nonces.
+     *
+     * @return the chunk part start nonces
+     */
+    public Map<BigInteger, Long> getChunkPartStartNonces() {
+        return chunkPartStartNonces;
+    }
+
+    /**
+     * Gets plot file by chunk part start nonce.
+     *
+     * @param chunkPartStartNonce the chunk part start nonce
+     * @return the plot file by chunk part start nonce
+     */
+    public PlotFile getPlotFileByChunkPartStartNonce(BigInteger chunkPartStartNonce) {
+        for (PlotDrive plotDrive : getPlotDrives()) {
+            for (PlotFile plotFile : plotDrive.getPlotFiles()) {
+                if (plotFile.getChunkPartStartNonces().containsKey(chunkPartStartNonce)) {
+                    return plotFile;
+                }
+            }
+        }
+        return null;
+    }
 }

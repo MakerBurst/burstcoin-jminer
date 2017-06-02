@@ -56,107 +56,84 @@ import java.util.Iterator;
  */
 @Component
 @Scope("prototype")
-public class ReaderLoadDriveTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(ReaderLoadDriveTask.class);
+public class ReaderLoadDriveTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(ReaderLoadDriveTask.class);
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  private PlotDrive plotDrive;
-  private int scoopNumber;
-  private long blockNumber;
-  private boolean showDriveInfo;
+    private PlotDrive plotDrive;
+    private int scoopNumber;
+    private long blockNumber;
+    private boolean showDriveInfo;
 
-  public void init(int scoopNumber, long blockNumber, PlotDrive plotDrive)
-  {
-    this.scoopNumber = scoopNumber;
-    this.blockNumber = blockNumber;
-    this.plotDrive = plotDrive;
+    public void init(int scoopNumber, long blockNumber, PlotDrive plotDrive) {
+        this.scoopNumber = scoopNumber;
+        this.blockNumber = blockNumber;
+        this.plotDrive = plotDrive;
 
-    showDriveInfo = CoreProperties.isShowDriveInfo();
-  }
-
-  @Override
-  public void run()
-  {
-    long startTime = showDriveInfo ? new Date().getTime() : 0;
-    Iterator<PlotFile> iterator = plotDrive.getPlotFiles().iterator();
-    boolean interrupted = false;
-    while(iterator.hasNext() && !interrupted)
-    {
-      PlotFile plotPathInfo = iterator.next();
-      if(plotPathInfo.getStaggeramt() % plotPathInfo.getNumberOfParts() > 0)
-      {
-        LOG.warn("staggeramt " + plotPathInfo.getStaggeramt() + " can not be devided by " + plotPathInfo.getNumberOfParts());
-        // fallback ... could lead to problems on optimized plot-files
-        plotPathInfo.setNumberOfParts(1);
-      }
-      interrupted = load(plotPathInfo);
+        showDriveInfo = CoreProperties.isShowDriveInfo();
     }
 
-    if(showDriveInfo)
-    {
-      if(interrupted)
-      {
-        publisher.publishEvent(new ReaderDriveInterruptedEvent(blockNumber, plotDrive.getDirectory()));
-      }
-      else
-      {
-        publisher.publishEvent(new ReaderDriveFinishEvent(plotDrive.getDirectory(), plotDrive.getSize(), new Date().getTime() - startTime, blockNumber));
-      }
-    }
-  }
-
-  private boolean load(PlotFile plotFile)
-  {
-    try (SeekableByteChannel sbc = Files.newByteChannel(plotFile.getFilePath(), EnumSet.of(StandardOpenOption.READ)))
-    {
-      long currentScoopPosition = scoopNumber * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE;
-
-      long partSize = plotFile.getStaggeramt() / plotFile.getNumberOfParts();
-      ByteBuffer partBuffer = ByteBuffer.allocate((int) (partSize * MiningPlot.SCOOP_SIZE));
-      // optimized plotFiles only have one chunk!
-      for(int chunkNumber = 0; chunkNumber < plotFile.getNumberOfChunks(); chunkNumber++)
-      {
-        long currentChunkPosition = chunkNumber * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE;
-        sbc.position(currentScoopPosition + currentChunkPosition);
-        for(int partNumber = 0; partNumber < plotFile.getNumberOfParts(); partNumber++)
-        {
-          sbc.read(partBuffer);
-
-          if(Reader.blockNumber != blockNumber)
-          {
-            LOG.trace("loadDriveThread stopped!");
-            partBuffer.clear();
-            sbc.close();
-            return true;
-          }
-          else
-          {
-            BigInteger chunkPartStartNonce = plotFile.getStartnonce().add(BigInteger.valueOf(chunkNumber * plotFile.getStaggeramt() + partNumber * partSize));
-            final byte[] scoops = partBuffer.array();
-            publisher.publishEvent(new ReaderLoadedPartEvent(blockNumber, scoops, chunkPartStartNonce));
-          }
-          partBuffer.clear();
+    @Override
+    public void run() {
+        long startTime = showDriveInfo ? new Date().getTime() : 0;
+        Iterator<PlotFile> iterator = plotDrive.getPlotFiles().iterator();
+        boolean interrupted = false;
+        while (iterator.hasNext() && !interrupted) {
+            PlotFile plotPathInfo = iterator.next();
+            if (plotPathInfo.getStaggeramt() % plotPathInfo.getNumberOfParts() > 0) {
+                LOG.warn("staggeramt " + plotPathInfo.getStaggeramt() + " can not be devided by " + plotPathInfo.getNumberOfParts());
+                // fallback ... could lead to problems on optimized plot-files
+                plotPathInfo.setNumberOfParts(1);
+            }
+            interrupted = load(plotPathInfo);
         }
-      }
-      sbc.close();
+
+        if (showDriveInfo) {
+            if (interrupted) {
+                publisher.publishEvent(new ReaderDriveInterruptedEvent(blockNumber, plotDrive.getDirectory()));
+            } else {
+                publisher.publishEvent(new ReaderDriveFinishEvent(plotDrive.getDirectory(), plotDrive.getSize(), new Date().getTime() - startTime, blockNumber));
+            }
+        }
     }
-    catch(NoSuchFileException exception)
-    {
-      LOG.error("File not found ... please restart to rescan plot-files, maybe set rescan to 'true': " + exception.getMessage());
+
+    private boolean load(PlotFile plotFile) {
+        try (SeekableByteChannel sbc = Files.newByteChannel(plotFile.getFilePath(), EnumSet.of(StandardOpenOption.READ))) {
+            long currentScoopPosition = scoopNumber * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE;
+
+            long partSize = plotFile.getStaggeramt() / plotFile.getNumberOfParts();
+            ByteBuffer partBuffer = ByteBuffer.allocate((int) (partSize * MiningPlot.SCOOP_SIZE));
+            // optimized plotFiles only have one chunk!
+            for (int chunkNumber = 0; chunkNumber < plotFile.getNumberOfChunks(); chunkNumber++) {
+                long currentChunkPosition = chunkNumber * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE;
+                sbc.position(currentScoopPosition + currentChunkPosition);
+                for (int partNumber = 0; partNumber < plotFile.getNumberOfParts(); partNumber++) {
+                    sbc.read(partBuffer);
+
+                    if (Reader.blockNumber != blockNumber) {
+                        LOG.trace("loadDriveThread stopped!");
+                        partBuffer.clear();
+                        sbc.close();
+                        return true;
+                    } else {
+                        BigInteger chunkPartStartNonce = plotFile.getStartnonce().add(BigInteger.valueOf(chunkNumber * plotFile.getStaggeramt() + partNumber * partSize));
+                        final byte[] scoops = partBuffer.array();
+                        publisher.publishEvent(new ReaderLoadedPartEvent(blockNumber, scoops, chunkPartStartNonce));
+                    }
+                    partBuffer.clear();
+                }
+            }
+            sbc.close();
+        } catch (NoSuchFileException exception) {
+            LOG.error("File not found ... please restart to rescan plot-files, maybe set rescan to 'true': " + exception.getMessage());
+        } catch (ClosedByInterruptException e) {
+            // we reach this, if we do not wait for task on shutdown - ByteChannel closed by thread interruption
+            LOG.trace("reader stopped cause of new block ...");
+        } catch (IOException e) {
+            LOG.error("IOException in: " + plotFile.getFilePath().toString() + " -> " + e.getMessage());
+        }
+        return false;
     }
-    catch(ClosedByInterruptException e)
-    {
-      // we reach this, if we do not wait for task on shutdown - ByteChannel closed by thread interruption
-      LOG.trace("reader stopped cause of new block ...");
-    }
-    catch(IOException e)
-    {
-      LOG.error("IOException in: " + plotFile.getFilePath().toString() +" -> " + e.getMessage());
-    }
-    return false;
-  }
 }

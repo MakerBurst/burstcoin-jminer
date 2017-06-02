@@ -36,33 +36,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
-public class JMinerApplication
-{
-  private static final Logger LOG = LoggerFactory.getLogger(JMinerApplication.class);
+public class JMinerApplication {
+    private static final Logger LOG = LoggerFactory.getLogger(JMinerApplication.class);
 
-  public static void main(String[] args)
-  {
-    LOG.info("Starting the engines ... please wait!");
+    public static void main(String[] args) {
+        LOG.info("Starting the engines ... please wait!");
 
-    // overwritten by application.properties
-    Map<String, Object> properties = new HashMap<>();
-    if(CoreProperties.isWriteLogFile())
-    {
-      properties.put("logging.file", CoreProperties.getLogFilePath());
+        // overwritten by application.properties
+        Map<String, Object> properties = new HashMap<>();
+        if (CoreProperties.isWriteLogFile()) {
+            properties.put("logging.file", CoreProperties.getLogFilePath());
+        }
+        properties.put("logging.level.burstcoin.jminer", CoreProperties.isDebug() ? "DEBUG" : "INFO");
+
+        new SpringApplicationBuilder(JMinerApplication.class)
+                .bannerMode(Banner.Mode.OFF) // turn off spring boot banner
+                .logStartupInfo(false)
+                .properties(properties) // add application.properties
+                .build(args)
+                .run();
     }
-    properties.put("logging.level.burstcoin.jminer", CoreProperties.isDebug() ? "DEBUG" : "INFO");
 
-    new SpringApplicationBuilder(JMinerApplication.class)
-      .bannerMode(Banner.Mode.OFF) // turn off spring boot banner
-      .logStartupInfo(false)
-      .properties(properties) // add application.properties
-      .build(args)
-      .run();
-  }
-
-  @Bean
-  public CommandLineRunner getCommandLineRunner(ConfigurableApplicationContext context)
-  {
-    return new JMinerCommandLine(context);
-  }
+    @Bean
+    public CommandLineRunner getCommandLineRunner(ConfigurableApplicationContext context) {
+        return new JMinerCommandLine(context);
+    }
 }

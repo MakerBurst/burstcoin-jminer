@@ -29,92 +29,83 @@ import java.math.BigInteger;
 /**
  * fired if server response deadline does not match calculated deadline.
  */
-public class NetworkResultErrorEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private BigInteger nonce;
+public class NetworkResultErrorEvent extends ApplicationEvent {
+    private long blockNumber;
+    private BigInteger nonce;
 
-  private long calculatedDeadline;
-  private long strangeDeadline;
+    private long calculatedDeadline;
+    private long strangeDeadline;
 
-  private BigInteger chunkPartStartNonce;
-  private BigInteger result;
+    private BigInteger chunkPartStartNonce;
+    private BigInteger result;
 
-  /**
-   * Instantiates a new Network result error event.
-   *
-   * @param blockNumber the block number
-   * @param nonce the nonce
-   * @param calculatedDeadline the calculated deadline
-   * @param strangeDeadline the strange deadline
-   * @param chunkPartStartNonce the chunk part start nonce
-   */
-  public NetworkResultErrorEvent(long blockNumber, BigInteger nonce, long calculatedDeadline, long strangeDeadline, BigInteger chunkPartStartNonce, BigInteger result)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Network result error event.
+     *
+     * @param blockNumber         the block number
+     * @param nonce               the nonce
+     * @param calculatedDeadline  the calculated deadline
+     * @param strangeDeadline     the strange deadline
+     * @param chunkPartStartNonce the chunk part start nonce
+     */
+    public NetworkResultErrorEvent(long blockNumber, BigInteger nonce, long calculatedDeadline, long strangeDeadline, BigInteger chunkPartStartNonce, BigInteger result) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.nonce = nonce;
-    this.calculatedDeadline = calculatedDeadline;
-    this.strangeDeadline = strangeDeadline;
+        this.blockNumber = blockNumber;
+        this.nonce = nonce;
+        this.calculatedDeadline = calculatedDeadline;
+        this.strangeDeadline = strangeDeadline;
 
-    this.chunkPartStartNonce = chunkPartStartNonce;
-    this.result = result;
-  }
+        this.chunkPartStartNonce = chunkPartStartNonce;
+        this.result = result;
+    }
 
-  /**
-   * Gets chunk part start nonce.
-   *
-   * @return the chunk part start nonce
-   */
-  public BigInteger getChunkPartStartNonce()
-  {
-    return chunkPartStartNonce;
-  }
+    /**
+     * Gets chunk part start nonce.
+     *
+     * @return the chunk part start nonce
+     */
+    public BigInteger getChunkPartStartNonce() {
+        return chunkPartStartNonce;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets nonce.
-   *
-   * @return the nonce
-   */
-  public BigInteger getNonce()
-  {
-    return nonce;
-  }
+    /**
+     * Gets nonce.
+     *
+     * @return the nonce
+     */
+    public BigInteger getNonce() {
+        return nonce;
+    }
 
-  /**
-   * Gets calculated deadline.
-   *
-   * @return the calculated deadline
-   */
-  public long getCalculatedDeadline()
-  {
-    return calculatedDeadline;
-  }
+    /**
+     * Gets calculated deadline.
+     *
+     * @return the calculated deadline
+     */
+    public long getCalculatedDeadline() {
+        return calculatedDeadline;
+    }
 
-  /**
-   * Gets strange deadline.
-   *
-   * @return the strange deadline
-   */
-  public long getStrangeDeadline()
-  {
-    return strangeDeadline;
-  }
+    /**
+     * Gets strange deadline.
+     *
+     * @return the strange deadline
+     */
+    public long getStrangeDeadline() {
+        return strangeDeadline;
+    }
 
-  public BigInteger getResult()
-  {
-    return result;
-  }
+    public BigInteger getResult() {
+        return result;
+    }
 }

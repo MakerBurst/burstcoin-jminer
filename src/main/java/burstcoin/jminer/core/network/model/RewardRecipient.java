@@ -24,21 +24,17 @@ package burstcoin.jminer.core.network.model;
 
 import java.io.Serializable;
 
-public class RewardRecipient
-  implements Serializable
-{
-  // accountId of reward recipient
-  private String rewardRecipient;
+public class RewardRecipient implements Serializable {
+    // accountId of reward recipient
+    private String rewardRecipient;
 
-  private long requestProcessingTime;
+    private long requestProcessingTime;
 
-  public String getRewardRecipient()
-  {
-    return rewardRecipient;
-  }
+    public String getRewardRecipient() {
+        return rewardRecipient;
+    }
 
-  public long getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    public long getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 }

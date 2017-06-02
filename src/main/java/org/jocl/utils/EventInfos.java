@@ -26,125 +26,113 @@ import org.jocl.cl_command_queue;
 import org.jocl.cl_context;
 import org.jocl.cl_event;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_EVENT_COMMAND_EXECUTION_STATUS;
+import static org.jocl.CL.CL_EVENT_COMMAND_QUEUE;
+import static org.jocl.CL.CL_EVENT_COMMAND_TYPE;
+import static org.jocl.CL.CL_EVENT_CONTEXT;
+import static org.jocl.CL.CL_EVENT_REFERENCE_COUNT;
+import static org.jocl.CL.stringFor_cl_command_type;
+import static org.jocl.CL.stringFor_command_execution_status;
 
 /**
  * Utility methods for obtaining information about cl_event objects.
  */
-public class EventInfos
-{
-  /**
-   * The command-queue associated with event
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static cl_command_queue getCommandQueue(cl_event event)
-  {
-    cl_command_queue result = new cl_command_queue();
-    Infos.getPointer(Infos.FOR_EVENT, event,
-                     CL_EVENT_COMMAND_QUEUE, result);
-    if(result.equals(new cl_command_queue()))
-    {
-      return null;
+public class EventInfos {
+    /**
+     * The command-queue associated with event
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static cl_command_queue getCommandQueue(cl_event event) {
+        cl_command_queue result = new cl_command_queue();
+        Infos.getPointer(Infos.FOR_EVENT, event,
+                CL_EVENT_COMMAND_QUEUE, result);
+        if (result.equals(new cl_command_queue())) {
+            return null;
+        }
+        return result;
     }
-    return result;
-  }
 
-  /**
-   * The context that this event belongs to
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static cl_context getContext(cl_event event)
-  {
-    cl_context result = new cl_context();
-    Infos.getPointer(Infos.FOR_EVENT, event,
-                     CL_EVENT_CONTEXT, result);
-    if(result.equals(new cl_context()))
-    {
-      return null;
+    /**
+     * The context that this event belongs to
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static cl_context getContext(cl_event event) {
+        cl_context result = new cl_context();
+        Infos.getPointer(Infos.FOR_EVENT, event,
+                CL_EVENT_CONTEXT, result);
+        if (result.equals(new cl_context())) {
+            return null;
+        }
+        return result;
     }
-    return result;
-  }
 
-  /**
-   * The command associated with event
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static int getCommandType(cl_event event)
-  {
-    return Infos.getInt(Infos.FOR_EVENT, event,
-                        CL_EVENT_COMMAND_TYPE);
-  }
+    /**
+     * The command associated with event
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static int getCommandType(cl_event event) {
+        return Infos.getInt(Infos.FOR_EVENT, event,
+                CL_EVENT_COMMAND_TYPE);
+    }
 
-  /**
-   * The command associated with event, as a String
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static String getCommandTypeString(cl_event event)
-  {
-    return stringFor_cl_command_type(
-      Infos.getInt(Infos.FOR_EVENT, event,
-                   CL_EVENT_COMMAND_TYPE));
-  }
+    /**
+     * The command associated with event, as a String
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static String getCommandTypeString(cl_event event) {
+        return stringFor_cl_command_type(
+                Infos.getInt(Infos.FOR_EVENT, event,
+                        CL_EVENT_COMMAND_TYPE));
+    }
 
-  /**
-   * The execution status of the command identified by event.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static int getCommandExecutionStatus(cl_event event)
-  {
-    return Infos.getInt(Infos.FOR_EVENT, event,
-                        CL_EVENT_COMMAND_EXECUTION_STATUS);
+    /**
+     * The execution status of the command identified by event.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static int getCommandExecutionStatus(cl_event event) {
+        return Infos.getInt(Infos.FOR_EVENT, event,
+                CL_EVENT_COMMAND_EXECUTION_STATUS);
 
-  }
+    }
 
-  /**
-   * The execution status of the command identified by event, as a String
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static String getCommandExecutionStatusString(cl_event event)
-  {
-    return stringFor_command_execution_status(
-      Infos.getInt(Infos.FOR_EVENT, event,
-                   CL_EVENT_COMMAND_EXECUTION_STATUS));
-  }
+    /**
+     * The execution status of the command identified by event, as a String
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static String getCommandExecutionStatusString(cl_event event) {
+        return stringFor_command_execution_status(
+                Infos.getInt(Infos.FOR_EVENT, event,
+                        CL_EVENT_COMMAND_EXECUTION_STATUS));
+    }
 
 
-  /**
-   * The reference count. Only intended for identifying memory leaks.
-   *
-   * @param event The event
-   *
-   * @return The value
-   */
-  public static int getReferenceCount(cl_event event)
-  {
-    return Infos.getInt(Infos.FOR_EVENT, event,
-                        CL_EVENT_REFERENCE_COUNT);
-  }
+    /**
+     * The reference count. Only intended for identifying memory leaks.
+     *
+     * @param event The event
+     * @return The value
+     */
+    public static int getReferenceCount(cl_event event) {
+        return Infos.getInt(Infos.FOR_EVENT, event,
+                CL_EVENT_REFERENCE_COUNT);
+    }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private EventInfos()
-  {
-  }
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private EventInfos() {
+    }
 }

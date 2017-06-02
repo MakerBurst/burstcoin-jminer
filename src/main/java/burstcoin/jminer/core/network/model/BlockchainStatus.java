@@ -27,225 +27,202 @@ import java.io.Serializable;
 /**
  * The type Blockchain status.
  */
-public class BlockchainStatus
-  implements Serializable
-{
-  private String lastBlock;
-  private String application;
-  private Boolean isScanning;
-  private String cumulativeDifficulty;
-  private int lastBlockchainFeederHeight;
-  private int numberOfBlocks;
-  private long time;
-  private int requestProcessingTime;
-  private String version;
-  private String lastBlockchainFeeder;
+public class BlockchainStatus implements Serializable {
+    private String lastBlock;
+    private String application;
+    private Boolean isScanning;
+    private String cumulativeDifficulty;
+    private int lastBlockchainFeederHeight;
+    private int numberOfBlocks;
+    private long time;
+    private int requestProcessingTime;
+    private String version;
+    private String lastBlockchainFeeder;
 
-  /**
-   * Instantiates a new Blockchain status.
-   */
-  public BlockchainStatus()
-  {
-  }
+    /**
+     * Instantiates a new Blockchain status.
+     */
+    public BlockchainStatus() {
+    }
 
-  /**
-   * Gets last block.
-   *
-   * @return the last block
-   */
-  public String getLastBlock()
-  {
-    return lastBlock;
-  }
+    /**
+     * Gets last block.
+     *
+     * @return the last block
+     */
+    public String getLastBlock() {
+        return lastBlock;
+    }
 
-  /**
-   * Sets last block.
-   *
-   * @param lastBlock the last block
-   */
-  public void setLastBlock(String lastBlock)
-  {
-    this.lastBlock = lastBlock;
-  }
+    /**
+     * Sets last block.
+     *
+     * @param lastBlock the last block
+     */
+    public void setLastBlock(String lastBlock) {
+        this.lastBlock = lastBlock;
+    }
 
-  /**
-   * Gets application.
-   *
-   * @return the application
-   */
-  public String getApplication()
-  {
-    return application;
-  }
+    /**
+     * Gets application.
+     *
+     * @return the application
+     */
+    public String getApplication() {
+        return application;
+    }
 
-  /**
-   * Sets application.
-   *
-   * @param application the application
-   */
-  public void setApplication(String application)
-  {
-    this.application = application;
-  }
+    /**
+     * Sets application.
+     *
+     * @param application the application
+     */
+    public void setApplication(String application) {
+        this.application = application;
+    }
 
-  /**
-   * Gets is scanning.
-   *
-   * @return the is scanning
-   */
-  public Boolean getIsScanning()
-  {
-    return isScanning;
-  }
+    /**
+     * Gets is scanning.
+     *
+     * @return the is scanning
+     */
+    public Boolean getIsScanning() {
+        return isScanning;
+    }
 
-  /**
-   * Sets is scanning.
-   *
-   * @param isScanning the is scanning
-   */
-  public void setIsScanning(Boolean isScanning)
-  {
-    this.isScanning = isScanning;
-  }
+    /**
+     * Sets is scanning.
+     *
+     * @param isScanning the is scanning
+     */
+    public void setIsScanning(Boolean isScanning) {
+        this.isScanning = isScanning;
+    }
 
-  /**
-   * Gets cumulative difficulty.
-   *
-   * @return the cumulative difficulty
-   */
-  public String getCumulativeDifficulty()
-  {
-    return cumulativeDifficulty;
-  }
+    /**
+     * Gets cumulative difficulty.
+     *
+     * @return the cumulative difficulty
+     */
+    public String getCumulativeDifficulty() {
+        return cumulativeDifficulty;
+    }
 
-  /**
-   * Sets cumulative difficulty.
-   *
-   * @param cumulativeDifficulty the cumulative difficulty
-   */
-  public void setCumulativeDifficulty(String cumulativeDifficulty)
-  {
-    this.cumulativeDifficulty = cumulativeDifficulty;
-  }
+    /**
+     * Sets cumulative difficulty.
+     *
+     * @param cumulativeDifficulty the cumulative difficulty
+     */
+    public void setCumulativeDifficulty(String cumulativeDifficulty) {
+        this.cumulativeDifficulty = cumulativeDifficulty;
+    }
 
-  /**
-   * Gets last blockchain feeder height.
-   *
-   * @return the last blockchain feeder height
-   */
-  public int getLastBlockchainFeederHeight()
-  {
-    return lastBlockchainFeederHeight;
-  }
+    /**
+     * Gets last blockchain feeder height.
+     *
+     * @return the last blockchain feeder height
+     */
+    public int getLastBlockchainFeederHeight() {
+        return lastBlockchainFeederHeight;
+    }
 
-  /**
-   * Sets last blockchain feeder height.
-   *
-   * @param lastBlockchainFeederHeight the last blockchain feeder height
-   */
-  public void setLastBlockchainFeederHeight(int lastBlockchainFeederHeight)
-  {
-    this.lastBlockchainFeederHeight = lastBlockchainFeederHeight;
-  }
+    /**
+     * Sets last blockchain feeder height.
+     *
+     * @param lastBlockchainFeederHeight the last blockchain feeder height
+     */
+    public void setLastBlockchainFeederHeight(int lastBlockchainFeederHeight) {
+        this.lastBlockchainFeederHeight = lastBlockchainFeederHeight;
+    }
 
-  /**
-   * Gets number of blocks.
-   *
-   * @return the number of blocks
-   */
-  public int getNumberOfBlocks()
-  {
-    return numberOfBlocks;
-  }
+    /**
+     * Gets number of blocks.
+     *
+     * @return the number of blocks
+     */
+    public int getNumberOfBlocks() {
+        return numberOfBlocks;
+    }
 
-  /**
-   * Sets number of blocks.
-   *
-   * @param numberOfBlocks the number of blocks
-   */
-  public void setNumberOfBlocks(int numberOfBlocks)
-  {
-    this.numberOfBlocks = numberOfBlocks;
-  }
+    /**
+     * Sets number of blocks.
+     *
+     * @param numberOfBlocks the number of blocks
+     */
+    public void setNumberOfBlocks(int numberOfBlocks) {
+        this.numberOfBlocks = numberOfBlocks;
+    }
 
-  /**
-   * Gets time.
-   *
-   * @return the time
-   */
-  public long getTime()
-  {
-    return time;
-  }
+    /**
+     * Gets time.
+     *
+     * @return the time
+     */
+    public long getTime() {
+        return time;
+    }
 
-  /**
-   * Sets time.
-   *
-   * @param time the time
-   */
-  public void setTime(long time)
-  {
-    this.time = time;
-  }
+    /**
+     * Sets time.
+     *
+     * @param time the time
+     */
+    public void setTime(long time) {
+        this.time = time;
+    }
 
-  /**
-   * Gets request processing time.
-   *
-   * @return the request processing time
-   */
-  public int getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    /**
+     * Gets request processing time.
+     *
+     * @return the request processing time
+     */
+    public int getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 
-  /**
-   * Sets request processing time.
-   *
-   * @param requestProcessingTime the request processing time
-   */
-  public void setRequestProcessingTime(int requestProcessingTime)
-  {
-    this.requestProcessingTime = requestProcessingTime;
-  }
+    /**
+     * Sets request processing time.
+     *
+     * @param requestProcessingTime the request processing time
+     */
+    public void setRequestProcessingTime(int requestProcessingTime) {
+        this.requestProcessingTime = requestProcessingTime;
+    }
 
-  /**
-   * Gets version.
-   *
-   * @return the version
-   */
-  public String getVersion()
-  {
-    return version;
-  }
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
 
-  /**
-   * Sets version.
-   *
-   * @param version the version
-   */
-  public void setVersion(String version)
-  {
-    this.version = version;
-  }
+    /**
+     * Sets version.
+     *
+     * @param version the version
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
-  /**
-   * Gets last blockchain feeder.
-   *
-   * @return the last blockchain feeder
-   */
-  public String getLastBlockchainFeeder()
-  {
-    return lastBlockchainFeeder;
-  }
+    /**
+     * Gets last blockchain feeder.
+     *
+     * @return the last blockchain feeder
+     */
+    public String getLastBlockchainFeeder() {
+        return lastBlockchainFeeder;
+    }
 
-  /**
-   * Sets last blockchain feeder.
-   *
-   * @param lastBlockchainFeeder the last blockchain feeder
-   */
-  public void setLastBlockchainFeeder(String lastBlockchainFeeder)
-  {
-    this.lastBlockchainFeeder = lastBlockchainFeeder;
-  }
+    /**
+     * Sets last blockchain feeder.
+     *
+     * @param lastBlockchainFeeder the last blockchain feeder
+     */
+    public void setLastBlockchainFeeder(String lastBlockchainFeeder) {
+        this.lastBlockchainFeeder = lastBlockchainFeeder;
+    }
 
 }

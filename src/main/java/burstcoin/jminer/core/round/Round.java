@@ -64,316 +64,264 @@ import java.util.TimerTask;
  */
 @Component
 @Scope("singleton")
-public class Round
-{
-  private static final Logger LOG = LoggerFactory.getLogger(Round.class);
+public class Round {
+    private static final Logger LOG = LoggerFactory.getLogger(Round.class);
 
-  private final ApplicationContext context;
-  private final ThreadPoolTaskExecutor roundPool;
-  private final Reader reader;
-  private final Checker checker;
-  private final Network network;
+    private final ApplicationContext context;
+    private final ThreadPoolTaskExecutor roundPool;
+    private final Reader reader;
+    private final Checker checker;
+    private final Network network;
 
-  private boolean poolMining;
-  private long targetDeadline;
+    private boolean poolMining;
+    private long targetDeadline;
 
-  private Timer timer;
-  private long blockNumber;
-  private long finishedBlockNumber;
-  private long baseTarget;
-  private Date roundStartDate;
+    private Timer timer;
+    private long blockNumber;
+    private long finishedBlockNumber;
+    private long baseTarget;
+    private Date roundStartDate;
 
-  private BigInteger lowest;
-  private long bestCommittedDeadline;
+    private BigInteger lowest;
+    private long bestCommittedDeadline;
 
-  // cache for next lowest
-  private CheckerResultEvent queuedEvent;
-  private BigInteger lowestCommitted;
+    // cache for next lowest
+    private CheckerResultEvent queuedEvent;
+    private BigInteger lowestCommitted;
 
-  private Set<BigInteger> runningChunkPartStartNonces;
-  private Plots plots;
+    private Set<BigInteger> runningChunkPartStartNonces;
+    private Plots plots;
 
-  @Autowired
-  public Round(Reader reader, Checker checker, Network network, ThreadPoolTaskExecutor roundPool, ApplicationContext context)
-  {
-    this.reader = reader;
-    this.checker = checker;
-    this.network = network;
-    this.roundPool = roundPool;
-    this.context = context;
-  }
-
-  @PostConstruct
-  protected void postConstruct()
-  {
-    this.poolMining = CoreProperties.isPoolMining();
-    timer = new Timer();
-  }
-
-  private void initNewRound(Plots plots)
-  {
-    runningChunkPartStartNonces = new HashSet<>(plots.getChunkPartStartNonces().keySet());
-    roundStartDate = new Date();
-    lowest = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-    lowestCommitted = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-    queuedEvent = null;
-    bestCommittedDeadline = Long.MAX_VALUE;
-  }
-
-  @EventListener
-  public void handleMessage(NetworkStateChangeEvent event)
-  {
-    if(blockNumber < event.getBlockNumber())
-    {
-      long previousBlockNumber = blockNumber;
-      this.blockNumber = event.getBlockNumber();
-      this.baseTarget = event.getBaseTarget();
-      this.targetDeadline = event.getTargetDeadline();
-
-      long lastBestCommittedDeadline = bestCommittedDeadline;
-
-      plots = reader.getPlots();
-      initNewRound(plots);
-
-      // reconfigure checker
-      checker.reconfigure(blockNumber, event.getGenerationSignature());
-
-      // start reader
-      int scoopNumber = calcScoopNumber(event.getBlockNumber(), event.getGenerationSignature());
-      reader.read(previousBlockNumber, blockNumber, scoopNumber, lastBestCommittedDeadline);
-
-      // ui event
-      fireEvent(new RoundStartedEvent(blockNumber, scoopNumber, plots.getSize(), targetDeadline, baseTarget));
-
-      timer.schedule(new TimerTask()
-      {
-        @Override
-        public void run()
-        {
-          network.checkLastWinner(blockNumber);
-        }
-      }, 0); // deferred
+    @Autowired
+    public Round(Reader reader, Checker checker, Network network, ThreadPoolTaskExecutor roundPool, ApplicationContext context) {
+        this.reader = reader;
+        this.checker = checker;
+        this.network = network;
+        this.roundPool = roundPool;
+        this.context = context;
     }
-  }
 
-  @EventListener
-  public void handleMessage(CheckerResultEvent event)
-  {
-    if(blockNumber == event.getBlockNumber())
-    {
-      // check new lowest result
-      if(event.getResult() != null)
-      {
-        BigInteger deadline = event.getResult().divide(BigInteger.valueOf(baseTarget));
-        long calculatedDeadline = deadline.longValue();
+    @PostConstruct
+    protected void postConstruct() {
+        this.poolMining = CoreProperties.isPoolMining();
+        timer = new Timer();
+    }
 
-        if(event.getResult().compareTo(lowest) < 0)
-        {
-          lowest = event.getResult();
-          if(calculatedDeadline < targetDeadline)
-          {
-            network.commitResult(blockNumber, calculatedDeadline, event.getNonce(), event.getChunkPartStartNonce(), plots.getSize(), event.getResult());
+    private void initNewRound(Plots plots) {
+        runningChunkPartStartNonces = new HashSet<>(plots.getChunkPartStartNonces().keySet());
+        roundStartDate = new Date();
+        lowest = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        lowestCommitted = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        queuedEvent = null;
+        bestCommittedDeadline = Long.MAX_VALUE;
+    }
+
+    @EventListener
+    public void handleMessage(NetworkStateChangeEvent event) {
+        if (blockNumber < event.getBlockNumber()) {
+            long previousBlockNumber = blockNumber;
+            this.blockNumber = event.getBlockNumber();
+            this.baseTarget = event.getBaseTarget();
+            this.targetDeadline = event.getTargetDeadline();
+
+            long lastBestCommittedDeadline = bestCommittedDeadline;
+
+            plots = reader.getPlots();
+            initNewRound(plots);
+
+            // reconfigure checker
+            checker.reconfigure(blockNumber, event.getGenerationSignature());
+
+            // start reader
+            int scoopNumber = calcScoopNumber(event.getBlockNumber(), event.getGenerationSignature());
+            reader.read(previousBlockNumber, blockNumber, scoopNumber, lastBestCommittedDeadline);
 
             // ui event
-            fireEvent(new RoundSingleResultEvent(event.getBlockNumber(), event.getNonce(), event.getChunkPartStartNonce(), calculatedDeadline,
-                                                 poolMining));
-          }
-          else
-          {
-            // ui event
-            if(CoreProperties.isShowSkippedDeadlines())
-            {
-              fireEvent(new RoundSingleResultSkippedEvent(event.getBlockNumber(), event.getNonce(), event.getChunkPartStartNonce(), calculatedDeadline,
-                                                          targetDeadline, poolMining));
+            fireEvent(new RoundStartedEvent(blockNumber, scoopNumber, plots.getSize(), targetDeadline, baseTarget));
+
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    network.checkLastWinner(blockNumber);
+                }
+            }, 0); // deferred
+        }
+    }
+
+    @EventListener
+    public void handleMessage(CheckerResultEvent event) {
+        if (blockNumber == event.getBlockNumber()) {
+            // check new lowest result
+            if (event.getResult() != null) {
+                BigInteger deadline = event.getResult().divide(BigInteger.valueOf(baseTarget));
+                long calculatedDeadline = deadline.longValue();
+
+                if (event.getResult().compareTo(lowest) < 0) {
+                    lowest = event.getResult();
+                    if (calculatedDeadline < targetDeadline) {
+                        network.commitResult(blockNumber, calculatedDeadline, event.getNonce(), event.getChunkPartStartNonce(), plots.getSize(), event.getResult());
+
+                        // ui event
+                        fireEvent(new RoundSingleResultEvent(event.getBlockNumber(), event.getNonce(), event.getChunkPartStartNonce(), calculatedDeadline,
+                                poolMining));
+                    } else {
+                        // ui event
+                        if (CoreProperties.isShowSkippedDeadlines()) {
+                            fireEvent(new RoundSingleResultSkippedEvent(event.getBlockNumber(), event.getNonce(), event.getChunkPartStartNonce(), calculatedDeadline,
+                                    targetDeadline, poolMining));
+                        }
+                        // chunkPartStartNonce finished
+                        runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
+                        triggerFinishRoundEvent(event.getBlockNumber());
+                    }
+                }
+                // remember next lowest in case that lowest fails to commit
+                else if (calculatedDeadline < targetDeadline
+                        && event.getResult().compareTo(lowestCommitted) < 0
+                        && (queuedEvent == null || event.getResult().compareTo(queuedEvent.getResult()) < 0)) {
+                    if (queuedEvent != null) {
+                        // remove previous queued
+                        runningChunkPartStartNonces.remove(queuedEvent.getChunkPartStartNonce());
+                    }
+                    LOG.info("dl '" + calculatedDeadline + "' queued");
+                    queuedEvent = event;
+
+                    triggerFinishRoundEvent(event.getBlockNumber());
+                } else {
+                    // chunkPartStartNonce finished
+                    runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
+                    triggerFinishRoundEvent(event.getBlockNumber());
+                }
+            } else {
+                LOG.error("CheckerResultEvent result == null");
             }
-            // chunkPartStartNonce finished
+        } else {
+            LOG.trace("event for previous block ...");
+        }
+    }
+
+    @EventListener
+    public void handleMessage(NetworkResultConfirmedEvent event) {
+        if (blockNumber == event.getBlockNumber()) {
+            lowestCommitted = event.getResult();
+
+            // if queuedLowest exist and is higher than lowestCommitted, remove queuedLowest
+            if (queuedEvent != null && lowestCommitted.compareTo(queuedEvent.getResult()) < 0) {
+                BigInteger dl = queuedEvent.getResult().divide(BigInteger.valueOf(baseTarget));
+                LOG.debug("dl '" + dl + "' removed from queue");
+
+                runningChunkPartStartNonces.remove(queuedEvent.getChunkPartStartNonce());
+                queuedEvent = null;
+            }
+
+            runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
+
+            if (bestCommittedDeadline > event.getDeadline()) {
+                bestCommittedDeadline = event.getDeadline();
+            }
+            triggerFinishRoundEvent(event.getBlockNumber());
+        }
+    }
+
+    @EventListener
+    public void handleMessage(NetworkResultErrorEvent event) {
+        if (blockNumber == event.getBlockNumber()) {
+            // reset lowest to lowestCommitted, as it does not commit successful.
+            lowest = lowestCommitted;
+            // in case that queued result is lower than committedLowest, commit queued again.
+            if (queuedEvent != null && lowestCommitted.compareTo(queuedEvent.getResult()) < 0) {
+                LOG.info("commit queued dl ...");
+                handleMessage(queuedEvent);
+
+                queuedEvent = null;
+            }
+
             runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
             triggerFinishRoundEvent(event.getBlockNumber());
-          }
         }
-        // remember next lowest in case that lowest fails to commit
-        else if(calculatedDeadline < targetDeadline
-                && event.getResult().compareTo(lowestCommitted) < 0
-                && (queuedEvent == null || event.getResult().compareTo(queuedEvent.getResult()) < 0))
-        {
-          if(queuedEvent != null)
-          {
-            // remove previous queued
-            runningChunkPartStartNonces.remove(queuedEvent.getChunkPartStartNonce());
-          }
-          LOG.info("dl '" + calculatedDeadline + "' queued");
-          queuedEvent = event;
-
-          triggerFinishRoundEvent(event.getBlockNumber());
-        }
-        else
-        {
-          // chunkPartStartNonce finished
-          runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
-          triggerFinishRoundEvent(event.getBlockNumber());
-        }
-      }
-      else
-      {
-        LOG.error("CheckerResultEvent result == null");
-      }
     }
-    else
-    {
-      LOG.trace("event for previous block ...");
-    }
-  }
 
-  @EventListener
-  public void handleMessage(NetworkResultConfirmedEvent event)
-  {
-    if(blockNumber == event.getBlockNumber())
-    {
-      lowestCommitted = event.getResult();
-
-      // if queuedLowest exist and is higher than lowestCommitted, remove queuedLowest
-      if(queuedEvent != null && lowestCommitted.compareTo(queuedEvent.getResult()) < 0)
-      {
-        BigInteger dl = queuedEvent.getResult().divide(BigInteger.valueOf(baseTarget));
-        LOG.debug("dl '" + dl + "' removed from queue");
-
-        runningChunkPartStartNonces.remove(queuedEvent.getChunkPartStartNonce());
-        queuedEvent = null;
-      }
-
-      runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
-
-      if(bestCommittedDeadline > event.getDeadline())
-      {
-        bestCommittedDeadline = event.getDeadline();
-      }
-      triggerFinishRoundEvent(event.getBlockNumber());
-    }
-  }
-
-  @EventListener
-  public void handleMessage(NetworkResultErrorEvent event)
-  {
-    if(blockNumber == event.getBlockNumber())
-    {
-      // reset lowest to lowestCommitted, as it does not commit successful.
-      lowest = lowestCommitted;
-      // in case that queued result is lower than committedLowest, commit queued again.
-      if(queuedEvent != null && lowestCommitted.compareTo(queuedEvent.getResult()) < 0)
-      {
-        LOG.info("commit queued dl ...");
-        handleMessage(queuedEvent);
-
-        queuedEvent = null;
-      }
-
-      runningChunkPartStartNonces.remove(event.getChunkPartStartNonce());
-      triggerFinishRoundEvent(event.getBlockNumber());
-    }
-  }
-
-  @EventListener
-  public void handleMessage(ReaderStoppedEvent event)
-  {
-    System.gc();
-    fireEvent(new RoundStoppedEvent(event.getBlockNumber(), event.getLastBestCommittedDeadline(), event.getCapacity(), event.getRemainingCapacity(),
-                                    event.getElapsedTime()));
-  }
-
-  private void triggerFinishRoundEvent(long blockNumber)
-  {
-    if(finishedBlockNumber < blockNumber)
-    {
-      if(runningChunkPartStartNonces.isEmpty())
-      {
-        onRoundFinish(blockNumber);
-      }
-      // commit queued if exists ... and it is the only remaining in runningChunkPartStartNonces
-      else if(queuedEvent != null && runningChunkPartStartNonces.size() == 1 && runningChunkPartStartNonces.contains(queuedEvent.getChunkPartStartNonce()))
-      {
-        handleMessage(queuedEvent);
-        queuedEvent = null;
-      }
-    }
-  }
-
-  private void onRoundFinish(long blockNumber)
-  {
-    finishedBlockNumber = blockNumber;
-    long elapsedRoundTime = new Date().getTime() - roundStartDate.getTime();
-    triggerGarbageCollection();
-    timer.schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        fireEvent(new RoundFinishedEvent(blockNumber, bestCommittedDeadline, elapsedRoundTime));
-      }
-    }, 250); // fire deferred
-
-    triggerCleanup();
-  }
-
-  private void triggerCleanup()
-  {
-    TimerTask cleanupTask = new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        if(!reader.cleanupReaderPool())
-        {
-          triggerCleanup();
-        }
-      }
-    };
-
-    try
-    {
-      timer.schedule(cleanupTask, 1000);
-    }
-    catch(IllegalStateException e)
-    {
-      LOG.error("cleanup task already scheduled ...");
-    }
-  }
-
-  // not needed, just to force java to free memory (depending on gc used)
-  private void triggerGarbageCollection()
-  {
-    timer.schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        LOG.trace("trigger garbage collection ... ");
+    @EventListener
+    public void handleMessage(ReaderStoppedEvent event) {
         System.gc();
-      }
-    }, 1500);
-  }
-
-  private <EVENT extends ApplicationEvent> void fireEvent(EVENT event)
-  {
-    RoundFireEventTask roundFireEventTask = context.getBean(RoundFireEventTask.class);
-    roundFireEventTask.init(event);
-    roundPool.execute(roundFireEventTask);
-  }
-
-  private static int calcScoopNumber(long blockNumber, byte[] generationSignature)
-  {
-    if(blockNumber > 0 && generationSignature != null)
-    {
-      ByteBuffer buf = ByteBuffer.allocate(32 + 8);
-      buf.put(generationSignature);
-      buf.putLong(blockNumber);
-
-      // generate new scoop number
-      Shabal256 md = new Shabal256();
-      md.update(buf.array());
-
-      BigInteger hashnum = new BigInteger(1, md.digest());
-      return hashnum.mod(BigInteger.valueOf(MiningPlot.SCOOPS_PER_PLOT)).intValue();
+        fireEvent(new RoundStoppedEvent(event.getBlockNumber(), event.getLastBestCommittedDeadline(), event.getCapacity(), event.getRemainingCapacity(),
+                event.getElapsedTime()));
     }
-    return 0;
-  }
+
+    private void triggerFinishRoundEvent(long blockNumber) {
+        if (finishedBlockNumber < blockNumber) {
+            if (runningChunkPartStartNonces.isEmpty()) {
+                onRoundFinish(blockNumber);
+            }
+            // commit queued if exists ... and it is the only remaining in runningChunkPartStartNonces
+            else if (queuedEvent != null && runningChunkPartStartNonces.size() == 1 && runningChunkPartStartNonces.contains(queuedEvent.getChunkPartStartNonce())) {
+                handleMessage(queuedEvent);
+                queuedEvent = null;
+            }
+        }
+    }
+
+    private void onRoundFinish(long blockNumber) {
+        finishedBlockNumber = blockNumber;
+        long elapsedRoundTime = new Date().getTime() - roundStartDate.getTime();
+        triggerGarbageCollection();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                fireEvent(new RoundFinishedEvent(blockNumber, bestCommittedDeadline, elapsedRoundTime));
+            }
+        }, 250); // fire deferred
+
+        triggerCleanup();
+    }
+
+    private void triggerCleanup() {
+        TimerTask cleanupTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (!reader.cleanupReaderPool()) {
+                    triggerCleanup();
+                }
+            }
+        };
+
+        try {
+            timer.schedule(cleanupTask, 1000);
+        } catch (IllegalStateException e) {
+            LOG.error("cleanup task already scheduled ...");
+        }
+    }
+
+    // not needed, just to force java to free memory (depending on gc used)
+    private void triggerGarbageCollection() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LOG.trace("trigger garbage collection ... ");
+                System.gc();
+            }
+        }, 1500);
+    }
+
+    private <EVENT extends ApplicationEvent> void fireEvent(EVENT event) {
+        RoundFireEventTask roundFireEventTask = context.getBean(RoundFireEventTask.class);
+        roundFireEventTask.init(event);
+        roundPool.execute(roundFireEventTask);
+    }
+
+    private static int calcScoopNumber(long blockNumber, byte[] generationSignature) {
+        if (blockNumber > 0 && generationSignature != null) {
+            ByteBuffer buf = ByteBuffer.allocate(32 + 8);
+            buf.put(generationSignature);
+            buf.putLong(blockNumber);
+
+            // generate new scoop number
+            Shabal256 md = new Shabal256();
+            md.update(buf.array());
+
+            BigInteger hashnum = new BigInteger(1, md.digest());
+            return hashnum.mod(BigInteger.valueOf(MiningPlot.SCOOPS_PER_PLOT)).intValue();
+        }
+        return 0;
+    }
 }

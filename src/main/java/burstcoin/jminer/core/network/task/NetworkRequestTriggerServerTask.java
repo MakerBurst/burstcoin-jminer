@@ -40,72 +40,60 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Scope("prototype")
-public class NetworkRequestTriggerServerTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestTriggerServerTask.class);
+public class NetworkRequestTriggerServerTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkRequestTriggerServerTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  // data
-  private String numericAccountId;
-  private String server;
-  private long connectionTimeout;
+    // data
+    private String numericAccountId;
+    private String server;
+    private long connectionTimeout;
 
-  public void init(String server, String numericAccountId,  long connectionTimeout)
-  {
-    this.server = server;
-    this.numericAccountId = numericAccountId;
-    this.connectionTimeout = connectionTimeout;
-  }
-
-  @Override
-  public void run()
-  {
-    // imitate requests done by wallet
-    getBlockChainStatus();
-    getUnconfirmedTransactions(numericAccountId);
-    LOG.trace("wallet server triggered!");
-  }
-
-  private BlockchainStatus getBlockChainStatus()
-  {
-    BlockchainStatus blockchainStatus = null;
-    try
-    {
-      ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlockchainStatus&random=" + new Random().nextFloat())
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
-
-      blockchainStatus = objectMapper.readValue(response.getContentAsString(), BlockchainStatus.class);
+    public void init(String server, String numericAccountId, long connectionTimeout) {
+        this.server = server;
+        this.numericAccountId = numericAccountId;
+        this.connectionTimeout = connectionTimeout;
     }
-    catch(Exception e)
-    {
-      LOG.debug("Error: Failed to 'getBlockchainStatus' from 'soloServer' to trigger server.");
-    }
-    return blockchainStatus;
-  }
 
-  private void getUnconfirmedTransactions(String numericAccountId)
-  {
-    try
-    {
-      ContentResponse response = httpClient
-        .newRequest(server + "/burst?requestType=getUnconfirmedTransactions&accountId=" + numericAccountId + "&random=" + new Random().nextFloat())
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
-
-      String contentAsString = response.getContentAsString();
-
-      LOG.trace(contentAsString);
+    @Override
+    public void run() {
+        // imitate requests done by wallet
+        getBlockChainStatus();
+        getUnconfirmedTransactions(numericAccountId);
+        LOG.trace("wallet server triggered!");
     }
-    catch(Exception e)
-    {
-      LOG.debug("Error: Failed to 'getUnconfirmedTransactions' to trigger server.");
+
+    private BlockchainStatus getBlockChainStatus() {
+        BlockchainStatus blockchainStatus = null;
+        try {
+            ContentResponse response = httpClient.newRequest(server + "/burst?requestType=getBlockchainStatus&random=" + new Random().nextFloat())
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
+
+            blockchainStatus = objectMapper.readValue(response.getContentAsString(), BlockchainStatus.class);
+        } catch (Exception e) {
+            LOG.debug("Error: Failed to 'getBlockchainStatus' from 'soloServer' to trigger server.");
+        }
+        return blockchainStatus;
     }
-  }
+
+    private void getUnconfirmedTransactions(String numericAccountId) {
+        try {
+            ContentResponse response = httpClient
+                    .newRequest(server + "/burst?requestType=getUnconfirmedTransactions&accountId=" + numericAccountId + "&random=" + new Random().nextFloat())
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
+
+            String contentAsString = response.getContentAsString();
+
+            LOG.trace(contentAsString);
+        } catch (Exception e) {
+            LOG.debug("Error: Failed to 'getUnconfirmedTransactions' to trigger server.");
+        }
+    }
 }

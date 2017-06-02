@@ -27,121 +27,108 @@ import java.io.Serializable;
 /**
  * The type Mining info response.
  */
-public class MiningInfoResponse
-  implements Serializable
-{
-  private String generationSignature;
-  private String baseTarget;
-  private long requestProcessingTime;
-  private String height;
+public class MiningInfoResponse implements Serializable {
+    private String generationSignature;
+    private String baseTarget;
+    private long requestProcessingTime;
+    private String height;
 
-  // only if pool
-  private long targetDeadline;
+    // only if pool
+    private long targetDeadline;
 
-  /**
-   * Instantiates a new Mining info response.
-   */
-  public MiningInfoResponse()
-  {
-  }
+    /**
+     * Instantiates a new Mining info response.
+     */
+    public MiningInfoResponse() {
+    }
 
-  /**
-   * Gets target deadline.
-   *
-   * @return the target deadline
-   */
-  public long getTargetDeadline()
-  {
-    return targetDeadline;
-  }
+    /**
+     * Gets target deadline.
+     *
+     * @return the target deadline
+     */
+    public long getTargetDeadline() {
+        return targetDeadline;
+    }
 
-  /**
-   * Sets target deadline.
-   *
-   * @param targetDeadline the target deadline
-   */
-  public void setTargetDeadline(long targetDeadline)
-  {
-    this.targetDeadline = targetDeadline;
-  }
+    /**
+     * Sets target deadline.
+     *
+     * @param targetDeadline the target deadline
+     */
+    public void setTargetDeadline(long targetDeadline) {
+        this.targetDeadline = targetDeadline;
+    }
 
-  /**
-   * Gets generation signature.
-   *
-   * @return the generation signature
-   */
-  public String getGenerationSignature()
-  {
-    return generationSignature;
-  }
+    /**
+     * Gets generation signature.
+     *
+     * @return the generation signature
+     */
+    public String getGenerationSignature() {
+        return generationSignature;
+    }
 
-  /**
-   * Sets generation signature.
-   *
-   * @param generationSignature the generation signature
-   */
-  public void setGenerationSignature(String generationSignature)
-  {
-    this.generationSignature = generationSignature;
-  }
+    /**
+     * Sets generation signature.
+     *
+     * @param generationSignature the generation signature
+     */
+    public void setGenerationSignature(String generationSignature) {
+        this.generationSignature = generationSignature;
+    }
 
-  /**
-   * Gets base target.
-   *
-   * @return the base target
-   */
-  public String getBaseTarget()
-  {
-    return baseTarget;
-  }
+    /**
+     * Gets base target.
+     *
+     * @return the base target
+     */
+    public String getBaseTarget() {
+        return baseTarget;
+    }
 
-  /**
-   * Sets base target.
-   *
-   * @param baseTarget the base target
-   */
-  public void setBaseTarget(String baseTarget)
-  {
-    this.baseTarget = baseTarget;
-  }
+    /**
+     * Sets base target.
+     *
+     * @param baseTarget the base target
+     */
+    public void setBaseTarget(String baseTarget) {
+        this.baseTarget = baseTarget;
+    }
 
-  /**
-   * Gets request processing time.
-   *
-   * @return the request processing time
-   */
-  public long getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    /**
+     * Gets request processing time.
+     *
+     * @return the request processing time
+     */
+    public long getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 
-  /**
-   * Sets request processing time.
-   *
-   * @param requestProcessingTime the request processing time
-   */
-  public void setRequestProcessingTime(long requestProcessingTime)
-  {
-    this.requestProcessingTime = requestProcessingTime;
-  }
+    /**
+     * Sets request processing time.
+     *
+     * @param requestProcessingTime the request processing time
+     */
+    public void setRequestProcessingTime(long requestProcessingTime) {
+        this.requestProcessingTime = requestProcessingTime;
+    }
 
-  /**
-   * Gets height.
-   *
-   * @return the height
-   */
-  public String getHeight()
-  {
-    return height;
-  }
+    /**
+     * Gets height.
+     *
+     * @return the height
+     */
+    public String getHeight() {
+        return height;
+    }
 
-  /**
-   * Sets height.
-   *
-   * @param height the height
-   */
-  public void setHeight(String height)
-  {
-    this.height = height;
-  }
+    /**
+     * Sets height.
+     *
+     * @param height the height
+     */
+    public void setHeight(String height) {
+        this.height = height;
+    }
 }

@@ -24,17 +24,14 @@ package burstcoin.jminer.core.network.event;
 
 import burstcoin.jminer.core.network.model.Blocks;
 
-public class NetworkBlocksEvent
-{
-  private Blocks blocks;
+public class NetworkBlocksEvent {
+    private Blocks blocks;
 
-  public NetworkBlocksEvent(Blocks blocks)
-  {
-    this.blocks = blocks;
-  }
+    public NetworkBlocksEvent(Blocks blocks) {
+        this.blocks = blocks;
+    }
 
-  public Blocks getBlocks()
-  {
-    return blocks;
-  }
+    public Blocks getBlocks() {
+        return blocks;
+    }
 }

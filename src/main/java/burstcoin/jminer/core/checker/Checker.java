@@ -38,42 +38,35 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("singleton")
-public class Checker
-{
-  private static final Logger LOG = LoggerFactory.getLogger(Checker.class);
+public class Checker {
+    private static final Logger LOG = LoggerFactory.getLogger(Checker.class);
 
-  private final ApplicationContext context;
-  private final SyncTaskExecutor checkTaskExecutor;
+    private final ApplicationContext context;
+    private final SyncTaskExecutor checkTaskExecutor;
 
-  // data
-  private long blockNumber;
-  private byte[] generationSignature;
+    // data
+    private long blockNumber;
+    private byte[] generationSignature;
 
-  @Autowired
-  public Checker(ApplicationContext context, SyncTaskExecutor checkTaskExecutor)
-  {
-    this.context = context;
-    this.checkTaskExecutor = checkTaskExecutor;
-  }
-
-  public void reconfigure(long blockNumber, byte[] generationSignature)
-  {
-    this.blockNumber = blockNumber;
-    this.generationSignature = generationSignature;
-  }
-
-  @EventListener
-  public void handleMessage(ReaderLoadedPartEvent event)
-  {
-    if(blockNumber == event.getBlockNumber())
-    {
-      OCLCheckerTask oclCheckerTask = context.getBean(OCLCheckerTask.class);
-      oclCheckerTask.init(event.getBlockNumber(), generationSignature, event.getScoops(), event.getChunkPartStartNonce());
-      checkTaskExecutor.execute(oclCheckerTask);
+    @Autowired
+    public Checker(ApplicationContext context, SyncTaskExecutor checkTaskExecutor) {
+        this.context = context;
+        this.checkTaskExecutor = checkTaskExecutor;
     }
-    else
-    {
-      LOG.trace("skipped check scoop ... old block ...");
+
+    public void reconfigure(long blockNumber, byte[] generationSignature) {
+        this.blockNumber = blockNumber;
+        this.generationSignature = generationSignature;
     }
-  }
+
+    @EventListener
+    public void handleMessage(ReaderLoadedPartEvent event) {
+        if (blockNumber == event.getBlockNumber()) {
+            OCLCheckerTask oclCheckerTask = context.getBean(OCLCheckerTask.class);
+            oclCheckerTask.init(event.getBlockNumber(), generationSignature, event.getScoops(), event.getChunkPartStartNonce());
+            checkTaskExecutor.execute(oclCheckerTask);
+        } else {
+            LOG.trace("skipped check scoop ... old block ...");
+        }
+    }
 }

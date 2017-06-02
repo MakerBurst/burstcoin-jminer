@@ -25,45 +25,38 @@ package burstcoin.jminer.core.reader.event;
 /**
  * fired on new round, if reader no finished with previous
  */
-public class ReaderStoppedEvent
-{
-  private long blockNumber;
-  private long capacity;
-  private long remainingCapacity;
-  private long elapsedTime;
-  private long lastBestCommittedDeadline;
+public class ReaderStoppedEvent {
+    private long blockNumber;
+    private long capacity;
+    private long remainingCapacity;
+    private long elapsedTime;
+    private long lastBestCommittedDeadline;
 
-  public ReaderStoppedEvent(long blockNumber, long capacity, long remainingCapacity, long elapsedTime, long lastBestCommittedDeadline)
-  {
-    this.blockNumber = blockNumber;
-    this.capacity = capacity;
-    this.remainingCapacity = remainingCapacity;
-    this.elapsedTime = elapsedTime;
-    this.lastBestCommittedDeadline = lastBestCommittedDeadline;
-  }
+    public ReaderStoppedEvent(long blockNumber, long capacity, long remainingCapacity, long elapsedTime, long lastBestCommittedDeadline) {
+        this.blockNumber = blockNumber;
+        this.capacity = capacity;
+        this.remainingCapacity = remainingCapacity;
+        this.elapsedTime = elapsedTime;
+        this.lastBestCommittedDeadline = lastBestCommittedDeadline;
+    }
 
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  public long getCapacity()
-  {
-    return capacity;
-  }
+    public long getCapacity() {
+        return capacity;
+    }
 
-  public long getRemainingCapacity()
-  {
-    return remainingCapacity;
-  }
+    public long getRemainingCapacity() {
+        return remainingCapacity;
+    }
 
-  public long getElapsedTime()
-  {
-    return elapsedTime;
-  }
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
 
-  public long getLastBestCommittedDeadline()
-  {
-    return lastBestCommittedDeadline;
-  }
+    public long getLastBestCommittedDeadline() {
+        return lastBestCommittedDeadline;
+    }
 }

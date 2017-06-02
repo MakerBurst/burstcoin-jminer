@@ -27,40 +27,34 @@ import java.math.BigInteger;
 /**
  * fired if chunk-part checked
  */
-public class CheckerResultEvent
-{
-  private BigInteger chunkPartStartNonce;
+public class CheckerResultEvent {
+    private BigInteger chunkPartStartNonce;
 
-  private long blockNumber;
-  private BigInteger nonce;
-  private BigInteger result;
+    private long blockNumber;
+    private BigInteger nonce;
+    private BigInteger result;
 
-  public CheckerResultEvent(long blockNumber, BigInteger chunkPartStartNonce, BigInteger nonce, BigInteger result)
-  {
-    this.chunkPartStartNonce = chunkPartStartNonce;
-    this.blockNumber = blockNumber;
+    public CheckerResultEvent(long blockNumber, BigInteger chunkPartStartNonce, BigInteger nonce, BigInteger result) {
+        this.chunkPartStartNonce = chunkPartStartNonce;
+        this.blockNumber = blockNumber;
 
-    this.nonce = nonce;
-    this.result = result;
-  }
+        this.nonce = nonce;
+        this.result = result;
+    }
 
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  public BigInteger getNonce()
-  {
-    return nonce;
-  }
+    public BigInteger getNonce() {
+        return nonce;
+    }
 
-  public BigInteger getResult()
-  {
-    return result;
-  }
+    public BigInteger getResult() {
+        return result;
+    }
 
-  public BigInteger getChunkPartStartNonce()
-  {
-    return chunkPartStartNonce;
-  }
+    public BigInteger getChunkPartStartNonce() {
+        return chunkPartStartNonce;
+    }
 }

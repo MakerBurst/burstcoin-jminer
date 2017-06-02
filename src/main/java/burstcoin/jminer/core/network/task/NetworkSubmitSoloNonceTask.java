@@ -44,83 +44,68 @@ import java.util.concurrent.TimeoutException;
  */
 @Component
 @Scope("prototype")
-public class NetworkSubmitSoloNonceTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkSubmitSoloNonceTask.class);
+public class NetworkSubmitSoloNonceTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkSubmitSoloNonceTask.class);
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  private String soloServer;
-  private String passPhrase;
-  private BigInteger nonce;
+    private String soloServer;
+    private String passPhrase;
+    private BigInteger nonce;
 
-  private long blockNumber;
-  private BigInteger chunkPartStartNonce;
-  private long calculatedDeadline;
-  private BigInteger result;
-  private long connectionTimeout;
+    private long blockNumber;
+    private BigInteger chunkPartStartNonce;
+    private long calculatedDeadline;
+    private BigInteger result;
+    private long connectionTimeout;
 
-  public void init(long blockNumber, String passPhrase, String soloServer, long connectionTimeout, BigInteger nonce, BigInteger chunkPartStartNonce,
-                   long calculatedDeadline, BigInteger result)
-  {
-    this.connectionTimeout = connectionTimeout;
+    public void init(long blockNumber, String passPhrase, String soloServer, long connectionTimeout, BigInteger nonce, BigInteger chunkPartStartNonce,
+                     long calculatedDeadline, BigInteger result) {
+        this.connectionTimeout = connectionTimeout;
 
-    this.soloServer = soloServer;
-    this.passPhrase = passPhrase;
-    this.nonce = nonce;
+        this.soloServer = soloServer;
+        this.passPhrase = passPhrase;
+        this.nonce = nonce;
 
-    this.blockNumber = blockNumber;
-    this.chunkPartStartNonce = chunkPartStartNonce;
-    this.calculatedDeadline = calculatedDeadline;
-    this.result = result;
-  }
+        this.blockNumber = blockNumber;
+        this.chunkPartStartNonce = chunkPartStartNonce;
+        this.calculatedDeadline = calculatedDeadline;
+        this.result = result;
+    }
 
-  @Override
-  public void run()
-  {
-    try
-    {
-      ContentResponse response = httpClient.POST(soloServer + "/burst")
-        .param("requestType", "submitNonce")
-        .param("secretPhrase", passPhrase)
+    @Override
+    public void run() {
+        try {
+            ContentResponse response = httpClient.POST(soloServer + "/burst")
+                    .param("requestType", "submitNonce")
+                    .param("secretPhrase", passPhrase)
 //        .param("nonce", Convert.toUnsignedLong(nonce))
-        .param("nonce", nonce.toString())
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
+                    .param("nonce", nonce.toString())
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
 
-      SubmitResultResponse result = objectMapper.readValue(response.getContentAsString(), SubmitResultResponse.class);
+            SubmitResultResponse result = objectMapper.readValue(response.getContentAsString(), SubmitResultResponse.class);
 
-      if(result.getResult().equals("success"))
-      {
-        if(calculatedDeadline == result.getDeadline())
-        {
-          publisher.publishEvent(new NetworkResultConfirmedEvent(blockNumber, result.getDeadline(), nonce, chunkPartStartNonce, this.result));
+            if (result.getResult().equals("success")) {
+                if (calculatedDeadline == result.getDeadline()) {
+                    publisher.publishEvent(new NetworkResultConfirmedEvent(blockNumber, result.getDeadline(), nonce, chunkPartStartNonce, this.result));
+                } else {
+                    publisher.publishEvent(new NetworkResultErrorEvent(blockNumber, nonce, calculatedDeadline, result.getDeadline(), chunkPartStartNonce, this.result));
+                }
+            } else {
+                LOG.warn("Error: Submit solo nonce not successful: " + response.getContentAsString());
+            }
+        } catch (TimeoutException timeoutException) {
+            LOG.warn("Unable to commit solo nonce, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to submit solo nonce: " + e.getMessage());
         }
-        else
-        {
-          publisher.publishEvent(new NetworkResultErrorEvent(blockNumber, nonce, calculatedDeadline, result.getDeadline(), chunkPartStartNonce, this.result));
-        }
-      }
-      else
-      {
-        LOG.warn("Error: Submit solo nonce not successful: " + response.getContentAsString());
-      }
     }
-    catch(TimeoutException timeoutException)
-    {
-      LOG.warn("Unable to commit solo nonce, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
-    }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to submit solo nonce: " + e.getMessage());
-    }
-  }
 }

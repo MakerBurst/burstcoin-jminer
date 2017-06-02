@@ -28,70 +28,63 @@ import org.springframework.context.ApplicationEvent;
 /**
  * fired on NetworkResultErrorEvent, if a calculated deadline was not matching server result, to deliver affected plot file
  */
-public class ReaderCorruptFileEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private String filePath;
-  private long numberOfChunks;
-  private int numberOfParts;
+public class ReaderCorruptFileEvent extends ApplicationEvent {
+    private long blockNumber;
+    private String filePath;
+    private long numberOfChunks;
+    private int numberOfParts;
 
-  /**
-   * Instantiates a new Reader corrupt file event.
-   *
-   * @param source the source
-   * @param blockNumber the block number
-   * @param filePath the file path
-   * @param numberOfChunks the number of chunks
-   * @param numberOfParts the number of parts
-   */
-  public ReaderCorruptFileEvent(Reader source, long blockNumber, String filePath, long numberOfChunks, int numberOfParts)
-  {
-    super(source);
-    this.blockNumber = blockNumber;
+    /**
+     * Instantiates a new Reader corrupt file event.
+     *
+     * @param source         the source
+     * @param blockNumber    the block number
+     * @param filePath       the file path
+     * @param numberOfChunks the number of chunks
+     * @param numberOfParts  the number of parts
+     */
+    public ReaderCorruptFileEvent(Reader source, long blockNumber, String filePath, long numberOfChunks, int numberOfParts) {
+        super(source);
+        this.blockNumber = blockNumber;
 
-    this.filePath = filePath;
-    this.numberOfChunks = numberOfChunks;
-    this.numberOfParts = numberOfParts;
-  }
+        this.filePath = filePath;
+        this.numberOfChunks = numberOfChunks;
+        this.numberOfParts = numberOfParts;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets file path.
-   *
-   * @return the file path
-   */
-  public String getFilePath()
-  {
-    return filePath;
-  }
+    /**
+     * Gets file path.
+     *
+     * @return the file path
+     */
+    public String getFilePath() {
+        return filePath;
+    }
 
-  /**
-   * Gets number of chunks.
-   *
-   * @return the number of chunks
-   */
-  public long getNumberOfChunks()
-  {
-    return numberOfChunks;
-  }
+    /**
+     * Gets number of chunks.
+     *
+     * @return the number of chunks
+     */
+    public long getNumberOfChunks() {
+        return numberOfChunks;
+    }
 
-  /**
-   * Gets number of parts.
-   *
-   * @return the number of parts
-   */
-  public int getNumberOfParts()
-  {
-    return numberOfParts;
-  }
+    /**
+     * Gets number of parts.
+     *
+     * @return the number of parts
+     */
+    public int getNumberOfParts() {
+        return numberOfParts;
+    }
 }

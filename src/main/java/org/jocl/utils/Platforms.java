@@ -33,39 +33,35 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.clGetPlatformIDs;
 
 /**
  * Utility methods related to platforms.
  */
-public class Platforms
-{
-  /**
-   * Returns an unmodifiable list of all available platforms
-   *
-   * @return The list of all available platforms
-   */
-  public static List<cl_platform_id> getPlatforms()
-  {
-    int numPlatformsArray[] = new int[1];
-    clGetPlatformIDs(0, null, numPlatformsArray);
-    int numPlatforms = numPlatformsArray[0];
+public class Platforms {
+    /**
+     * Returns an unmodifiable list of all available platforms
+     *
+     * @return The list of all available platforms
+     */
+    public static List<cl_platform_id> getPlatforms() {
+        int numPlatformsArray[] = new int[1];
+        clGetPlatformIDs(0, null, numPlatformsArray);
+        int numPlatforms = numPlatformsArray[0];
 
-    if(numPlatforms > 0)
-    {
-      cl_platform_id platforms[] = new cl_platform_id[numPlatforms];
-      clGetPlatformIDs(platforms.length, platforms, null);
-      return Arrays.asList(platforms);
+        if (numPlatforms > 0) {
+            cl_platform_id platforms[] = new cl_platform_id[numPlatforms];
+            clGetPlatformIDs(platforms.length, platforms, null);
+            return Arrays.asList(platforms);
+        }
+        return Collections.emptyList();
     }
-    return Collections.emptyList();
-  }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private Platforms()
-  {
-  }
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private Platforms() {
+    }
 
 }

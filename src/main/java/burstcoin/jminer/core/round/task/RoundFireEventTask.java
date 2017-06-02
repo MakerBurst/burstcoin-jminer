@@ -35,24 +35,20 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
-public class RoundFireEventTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(RoundFireEventTask.class);
+public class RoundFireEventTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(RoundFireEventTask.class);
 
-  @Autowired
-  private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-  private ApplicationEvent event;
+    private ApplicationEvent event;
 
-  public <EVENT extends ApplicationEvent> void init(EVENT event)
-  {
-    this.event = event;
-  }
+    public <EVENT extends ApplicationEvent> void init(EVENT event) {
+        this.event = event;
+    }
 
-  @Override
-  public void run()
-  {
-    publisher.publishEvent(event);
-  }
+    @Override
+    public void run() {
+        publisher.publishEvent(event);
+    }
 }

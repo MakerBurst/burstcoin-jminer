@@ -24,84 +24,76 @@ package org.jocl.utils;
 
 import org.jocl.cl_platform_id;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_PLATFORM_EXTENSIONS;
+import static org.jocl.CL.CL_PLATFORM_NAME;
+import static org.jocl.CL.CL_PLATFORM_PROFILE;
+import static org.jocl.CL.CL_PLATFORM_VENDOR;
+import static org.jocl.CL.CL_PLATFORM_VERSION;
 
 /**
  * Utility methods for obtaining information about cl_platform_id objects
  */
-public class PlatformInfos
-{
-  /**
-   * Platform name string
-   *
-   * @param platform The platform
-   *
-   * @return The value
-   */
-  public static String getName(cl_platform_id platform)
-  {
-    return Infos.getString(Infos.FOR_PLATFORM, platform,
-                           CL_PLATFORM_NAME);
-  }
+public class PlatformInfos {
+    /**
+     * Platform name string
+     *
+     * @param platform The platform
+     * @return The value
+     */
+    public static String getName(cl_platform_id platform) {
+        return Infos.getString(Infos.FOR_PLATFORM, platform,
+                CL_PLATFORM_NAME);
+    }
 
-  /**
-   * Platform vendor string
-   *
-   * @param platform The platform
-   *
-   * @return The value
-   */
-  public static String getVendor(cl_platform_id platform)
-  {
-    return Infos.getString(Infos.FOR_PLATFORM, platform,
-                           CL_PLATFORM_VENDOR);
-  }
+    /**
+     * Platform vendor string
+     *
+     * @param platform The platform
+     * @return The value
+     */
+    public static String getVendor(cl_platform_id platform) {
+        return Infos.getString(Infos.FOR_PLATFORM, platform,
+                CL_PLATFORM_VENDOR);
+    }
 
-  /**
-   * OpenCL version string
-   *
-   * @param platform The platform
-   *
-   * @return The value
-   */
-  public static String getVersion(cl_platform_id platform)
-  {
-    return Infos.getString(Infos.FOR_PLATFORM, platform,
-                           CL_PLATFORM_VERSION);
-  }
+    /**
+     * OpenCL version string
+     *
+     * @param platform The platform
+     * @return The value
+     */
+    public static String getVersion(cl_platform_id platform) {
+        return Infos.getString(Infos.FOR_PLATFORM, platform,
+                CL_PLATFORM_VERSION);
+    }
 
-  /**
-   * The profile name supported by the implementation
-   *
-   * @param platform The platform
-   *
-   * @return The value
-   */
-  public static String getProfile(cl_platform_id platform)
-  {
-    return Infos.getString(Infos.FOR_PLATFORM, platform,
-                           CL_PLATFORM_PROFILE);
-  }
+    /**
+     * The profile name supported by the implementation
+     *
+     * @param platform The platform
+     * @return The value
+     */
+    public static String getProfile(cl_platform_id platform) {
+        return Infos.getString(Infos.FOR_PLATFORM, platform,
+                CL_PLATFORM_PROFILE);
+    }
 
-  /**
-   * A space-separated list of extension names
-   *
-   * @param platform The platform
-   *
-   * @return The value
-   */
-  public static String getExtensions(cl_platform_id platform)
-  {
-    return Infos.getString(Infos.FOR_PLATFORM, platform,
-                           CL_PLATFORM_EXTENSIONS);
-  }
+    /**
+     * A space-separated list of extension names
+     *
+     * @param platform The platform
+     * @return The value
+     */
+    public static String getExtensions(cl_platform_id platform) {
+        return Infos.getString(Infos.FOR_PLATFORM, platform,
+                CL_PLATFORM_EXTENSIONS);
+    }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private PlatformInfos()
-  {
-  }
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private PlatformInfos() {
+    }
 
 }

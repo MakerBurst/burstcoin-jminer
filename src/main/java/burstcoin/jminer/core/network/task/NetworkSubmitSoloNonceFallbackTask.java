@@ -41,80 +41,64 @@ import java.util.concurrent.TimeoutException;
  */
 @Component
 @Scope("prototype")
-public class NetworkSubmitSoloNonceFallbackTask
-  implements Runnable
-{
-  private static final Logger LOG = LoggerFactory.getLogger(NetworkSubmitSoloNonceTask.class);
+public class NetworkSubmitSoloNonceFallbackTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkSubmitSoloNonceTask.class);
 
-  @Autowired
-  private HttpClient httpClient;
+    @Autowired
+    private HttpClient httpClient;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  private String soloServer;
-  private String passPhrase;
-  private BigInteger nonce;
+    private String soloServer;
+    private String passPhrase;
+    private BigInteger nonce;
 
-  private long calculatedDeadline;
-  private long delay;
-  private long connectionTimeout;
+    private long calculatedDeadline;
+    private long delay;
+    private long connectionTimeout;
 
-  public void init(String soloServer, long delay, String passPhrase, long connectionTimeout, BigInteger nonce, long calculatedDeadline)
-  {
-    this.delay = delay;
-    this.connectionTimeout = connectionTimeout;
+    public void init(String soloServer, long delay, String passPhrase, long connectionTimeout, BigInteger nonce, long calculatedDeadline) {
+        this.delay = delay;
+        this.connectionTimeout = connectionTimeout;
 
-    this.soloServer = soloServer;
-    this.passPhrase = passPhrase;
-    this.nonce = nonce;
+        this.soloServer = soloServer;
+        this.passPhrase = passPhrase;
+        this.nonce = nonce;
 
-    this.calculatedDeadline = calculatedDeadline;
-  }
-
-  @Override
-  public void run()
-  {
-    // wait delay
-    try
-    {
-      Thread.sleep(delay);
-    }
-    catch(InterruptedException e)
-    {
-      e.printStackTrace();
+        this.calculatedDeadline = calculatedDeadline;
     }
 
-    try
-    {
-      ContentResponse response = httpClient.POST(soloServer + "/burst")
-        .param("requestType", "submitNonce")
-        .param("secretPhrase", passPhrase)
-        .param("nonce", nonce.toString())
-        .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
-        .send();
-
-      SubmitResultResponse result = objectMapper.readValue(response.getContentAsString(), SubmitResultResponse.class);
-
-      if(result.getResult().equals("success"))
-      {
-        if(calculatedDeadline == result.getDeadline())
-        {
-          LOG.info("recommit dl '" + result.getDeadline() + "' after '" + delay / 1000 + " sec.'");
+    @Override
+    public void run() {
+        // wait delay
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-      }
-      else
-      {
-        LOG.warn("Error: Recommit solo nonce not successful: " + response.getContentAsString());
-      }
+
+        try {
+            ContentResponse response = httpClient.POST(soloServer + "/burst")
+                    .param("requestType", "submitNonce")
+                    .param("secretPhrase", passPhrase)
+                    .param("nonce", nonce.toString())
+                    .timeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                    .send();
+
+            SubmitResultResponse result = objectMapper.readValue(response.getContentAsString(), SubmitResultResponse.class);
+
+            if (result.getResult().equals("success")) {
+                if (calculatedDeadline == result.getDeadline()) {
+                    LOG.info("recommit dl '" + result.getDeadline() + "' after '" + delay / 1000 + " sec.'");
+                }
+            } else {
+                LOG.warn("Error: Recommit solo nonce not successful: " + response.getContentAsString());
+            }
+        } catch (TimeoutException timeoutException) {
+            LOG.warn("Unable to recommit solo nonce, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
+        } catch (Exception e) {
+            LOG.warn("Error: Failed to recommit solo nonce: " + e.getMessage());
+        }
     }
-    catch(TimeoutException timeoutException)
-    {
-      LOG.warn("Unable to recommit solo nonce, caused by connectionTimeout, currently '" + (connectionTimeout / 1000) + " sec.' try increasing it!");
-    }
-    catch(Exception e)
-    {
-      LOG.warn("Error: Failed to recommit solo nonce: " + e.getMessage());
-    }
-  }
 }

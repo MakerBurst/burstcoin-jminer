@@ -32,145 +32,130 @@ import org.jocl.cl_context;
 import org.jocl.cl_device_id;
 import org.jocl.cl_program;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_PROGRAM_BINARIES;
+import static org.jocl.CL.CL_PROGRAM_BINARY_SIZES;
+import static org.jocl.CL.CL_PROGRAM_CONTEXT;
+import static org.jocl.CL.CL_PROGRAM_DEVICES;
+import static org.jocl.CL.CL_PROGRAM_NUM_DEVICES;
+import static org.jocl.CL.CL_PROGRAM_REFERENCE_COUNT;
+import static org.jocl.CL.CL_PROGRAM_SOURCE;
 
 /**
  * Utility methods for obtaining information about cl_program objects
  */
-public class ProgramInfos
-{
-  /**
-   * The reference count. Only intended for identifying memory leaks.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static int getReferenceCount(cl_program program)
-  {
-    return Infos.getInt(Infos.FOR_PROGRAM, program,
-                        CL_PROGRAM_REFERENCE_COUNT);
-  }
-
-  /**
-   * The context of the program.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static cl_context getContext(cl_program program)
-  {
-    cl_context result = new cl_context();
-    Infos.getPointer(Infos.FOR_PROGRAM, program,
-                     CL_PROGRAM_CONTEXT, result);
-    if(result.equals(new cl_context()))
-    {
-      return null;
+public class ProgramInfos {
+    /**
+     * The reference count. Only intended for identifying memory leaks.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static int getReferenceCount(cl_program program) {
+        return Infos.getInt(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_REFERENCE_COUNT);
     }
-    return result;
-  }
 
-  /**
-   * The number of devices associated with the program.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static int getNumDevices(cl_program program)
-  {
-    return Infos.getInt(Infos.FOR_PROGRAM, program,
-                        CL_PROGRAM_NUM_DEVICES);
-  }
-
-  /**
-   * The devices associated with the program.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static cl_device_id[] getDevices(cl_program program)
-  {
-    int numDevices = getNumDevices(program);
-    cl_device_id devices[] = new cl_device_id[numDevices];
-    Infos.getPointers(Infos.FOR_PROGRAM, program,
-                      CL_PROGRAM_DEVICES, devices);
-    cl_device_id nullDevice = new cl_device_id();
-    for(int i = 0; i < numDevices; i++)
-    {
-      if(devices[i].equals(nullDevice))
-      {
-        devices[i] = null;
-      }
+    /**
+     * The context of the program.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static cl_context getContext(cl_program program) {
+        cl_context result = new cl_context();
+        Infos.getPointer(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_CONTEXT, result);
+        if (result.equals(new cl_context())) {
+            return null;
+        }
+        return result;
     }
-    return devices;
-  }
 
-  /**
-   * The program source code
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static String getSource(cl_program program)
-  {
-    return Infos.getString(Infos.FOR_PROGRAM, program,
-                           CL_PROGRAM_SOURCE);
-  }
-
-
-  /**
-   * The sizes of the program binaries for each device.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static long[] getBinarySizes(cl_program program)
-  {
-    int numBinaries = getNumDevices(program);
-    return Infos.getSizes(Infos.FOR_PROGRAM, program,
-                          CL_PROGRAM_BINARY_SIZES, numBinaries);
-  }
-
-  /**
-   * The sizes of the program binaries for each device.
-   *
-   * @param program The program
-   *
-   * @return The value
-   */
-  public static String[] getBinaries(cl_program program)
-  {
-    int numBinaries = getNumDevices(program);
-    long sizes[] = getBinarySizes(program);
-    byte dataArrays[][] = new byte[numBinaries][];
-    Pointer dataPointers[] = new Pointer[numBinaries];
-    for(int i = 0; i < numBinaries; i++)
-    {
-      dataArrays[i] = new byte[(int) sizes[i]];
-      dataPointers[i] = Pointer.to(dataArrays[i]);
+    /**
+     * The number of devices associated with the program.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static int getNumDevices(cl_program program) {
+        return Infos.getInt(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_NUM_DEVICES);
     }
-    Infos.getPointers(Infos.FOR_PROGRAM, program,
-                      CL_PROGRAM_BINARIES, dataPointers);
-    String dataStrings[] = new String[numBinaries];
-    for(int i = 0; i < numBinaries; i++)
-    {
-      dataStrings[i] = new String(dataArrays[i], 0, (int) sizes[i] - 1);
+
+    /**
+     * The devices associated with the program.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static cl_device_id[] getDevices(cl_program program) {
+        int numDevices = getNumDevices(program);
+        cl_device_id devices[] = new cl_device_id[numDevices];
+        Infos.getPointers(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_DEVICES, devices);
+        cl_device_id nullDevice = new cl_device_id();
+        for (int i = 0; i < numDevices; i++) {
+            if (devices[i].equals(nullDevice)) {
+                devices[i] = null;
+            }
+        }
+        return devices;
     }
-    return dataStrings;
-  }
+
+    /**
+     * The program source code
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static String getSource(cl_program program) {
+        return Infos.getString(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_SOURCE);
+    }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private ProgramInfos()
-  {
+    /**
+     * The sizes of the program binaries for each device.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static long[] getBinarySizes(cl_program program) {
+        int numBinaries = getNumDevices(program);
+        return Infos.getSizes(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_BINARY_SIZES, numBinaries);
+    }
 
-  }
+    /**
+     * The sizes of the program binaries for each device.
+     *
+     * @param program The program
+     * @return The value
+     */
+    public static String[] getBinaries(cl_program program) {
+        int numBinaries = getNumDevices(program);
+        long sizes[] = getBinarySizes(program);
+        byte dataArrays[][] = new byte[numBinaries][];
+        Pointer dataPointers[] = new Pointer[numBinaries];
+        for (int i = 0; i < numBinaries; i++) {
+            dataArrays[i] = new byte[(int) sizes[i]];
+            dataPointers[i] = Pointer.to(dataArrays[i]);
+        }
+        Infos.getPointers(Infos.FOR_PROGRAM, program,
+                CL_PROGRAM_BINARIES, dataPointers);
+        String dataStrings[] = new String[numBinaries];
+        for (int i = 0; i < numBinaries; i++) {
+            dataStrings[i] = new String(dataArrays[i], 0, (int) sizes[i] - 1);
+        }
+        return dataStrings;
+    }
+
+
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private ProgramInfos() {
+
+    }
 
 }

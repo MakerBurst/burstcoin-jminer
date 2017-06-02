@@ -23,7 +23,8 @@ public final class Crypto {
         }
     };
 
-    private Crypto() {} //never
+    private Crypto() {
+    } //never
 
     public static MessageDigest getMessageDigest(String algorithm) {
         try {
@@ -57,8 +58,7 @@ public final class Crypto {
             byte[] s = Crypto.sha256().digest(secretPhrase.getBytes("UTF-8"));
             Curve25519.clamp(s);
             return s;
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -234,7 +234,7 @@ public final class Crypto {
             byte[] key = sha256.digest(seed);
             for (int j = 0; j < 32; j++) {
                 data[position++] ^= key[j];
-                seed[j] = (byte)(~seed[j]);
+                seed[j] = (byte) (~seed[j]);
             }
             seed = sha256.digest(seed);
         }
@@ -281,7 +281,7 @@ public final class Crypto {
         rsString = rsString.toUpperCase();
         try {
             long id = ReedSolomon.decode(rsString);
-            if (! rsString.equals(ReedSolomon.encode(id))) {
+            if (!rsString.equals(ReedSolomon.encode(id))) {
                 throw new RuntimeException("ERROR: Reed-Solomon decoding of " + rsString
                         + " not reversible, decoded to " + id);
             }

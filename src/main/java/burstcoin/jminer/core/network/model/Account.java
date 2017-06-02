@@ -27,32 +27,26 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Account
-  implements Serializable
-{
-  private String accountRS;
-  private String balanceNQT;
-  private String forgedBalanceNQT;
+public class Account implements Serializable {
+    private String accountRS;
+    private String balanceNQT;
+    private String forgedBalanceNQT;
 
-  private long requestProcessingTime;
+    private long requestProcessingTime;
 
-  public String getAccountRS()
-  {
-    return accountRS;
-  }
+    public String getAccountRS() {
+        return accountRS;
+    }
 
-  public String getBalanceNQT()
-  {
-    return balanceNQT;
-  }
+    public String getBalanceNQT() {
+        return balanceNQT;
+    }
 
-  public String getForgedBalanceNQT()
-  {
-    return forgedBalanceNQT;
-  }
+    public String getForgedBalanceNQT() {
+        return forgedBalanceNQT;
+    }
 
-  public long getRequestProcessingTime()
-  {
-    return requestProcessingTime;
-  }
+    public long getRequestProcessingTime() {
+        return requestProcessingTime;
+    }
 }

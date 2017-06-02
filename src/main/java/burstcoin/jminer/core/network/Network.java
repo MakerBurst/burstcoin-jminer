@@ -49,187 +49,156 @@ import java.util.TimerTask;
 
 @Component
 @Scope("singleton")
-public class Network
-{
-  private static final Logger LOG = LoggerFactory.getLogger(Network.class);
+public class Network {
+    private static final Logger LOG = LoggerFactory.getLogger(Network.class);
 
-  @Autowired
-  private ApplicationContext context;
+    @Autowired
+    private ApplicationContext context;
 
-  @Autowired
-  @Qualifier(value = "networkPool")
-  private SimpleAsyncTaskExecutor networkPool;
+    @Autowired
+    @Qualifier(value = "networkPool")
+    private SimpleAsyncTaskExecutor networkPool;
 
-  private String numericAccountId;
-  private boolean poolMining;
+    private String numericAccountId;
+    private boolean poolMining;
 
-  private String poolServer;
-  private String walletServer;
+    private String poolServer;
+    private String walletServer;
 
-  private String soloServer;
-  private String passPhrase;
-  private long defaultTargetDeadline;
+    private String soloServer;
+    private String passPhrase;
+    private long defaultTargetDeadline;
 
-  private long connectionTimeout;
+    private long connectionTimeout;
 
-  private int winnerRetriesOnAsync;
-  private long winnerRetryIntervalInMs;
+    private int winnerRetriesOnAsync;
+    private long winnerRetryIntervalInMs;
 
-  private long blockNumber;
-  private Timer timer;
+    private long blockNumber;
+    private Timer timer;
 
-  @PostConstruct
-  protected void postConstruct()
-  {
-    timer = new Timer();
-    poolMining = CoreProperties.isPoolMining();
-    if(poolMining)
-    {
-      String poolServer = CoreProperties.getPoolServer();
-      String numericAccountId = CoreProperties.getNumericAccountId();
+    @PostConstruct
+    protected void postConstruct() {
+        timer = new Timer();
+        poolMining = CoreProperties.isPoolMining();
+        if (poolMining) {
+            String poolServer = CoreProperties.getPoolServer();
+            String numericAccountId = CoreProperties.getNumericAccountId();
 
-      if(!StringUtils.isEmpty(poolServer) && !StringUtils.isEmpty(numericAccountId))
-      {
-        this.poolServer = CoreProperties.getPoolServer();
-        this.numericAccountId = CoreProperties.getNumericAccountId();
+            if (!StringUtils.isEmpty(poolServer) && !StringUtils.isEmpty(numericAccountId)) {
+                this.poolServer = CoreProperties.getPoolServer();
+                this.numericAccountId = CoreProperties.getNumericAccountId();
 
-        this.walletServer = CoreProperties.getWalletServer();
-        this.winnerRetriesOnAsync = CoreProperties.getWinnerRetriesOnAsync();
-        this.winnerRetryIntervalInMs = CoreProperties.getWinnerRetryIntervalInMs();
-      }
-      else
-      {
-        LOG.error("init pool network failed!");
-        LOG.error("jminer.properties: 'poolServer' or 'numericAccountId' is missing?!");
-      }
-    }
-    else
-    {
-      String soloServer = CoreProperties.getSoloServer();
-      String passPhrase = CoreProperties.getPassPhrase();
+                this.walletServer = CoreProperties.getWalletServer();
+                this.winnerRetriesOnAsync = CoreProperties.getWinnerRetriesOnAsync();
+                this.winnerRetryIntervalInMs = CoreProperties.getWinnerRetryIntervalInMs();
+            } else {
+                LOG.error("init pool network failed!");
+                LOG.error("jminer.properties: 'poolServer' or 'numericAccountId' is missing?!");
+            }
+        } else {
+            String soloServer = CoreProperties.getSoloServer();
+            String passPhrase = CoreProperties.getPassPhrase();
 
-      if(!StringUtils.isEmpty(soloServer) && !StringUtils.isEmpty(passPhrase))
-      {
-        this.soloServer = soloServer;
-        this.passPhrase = passPhrase;
-      }
-      else
-      {
-        LOG.error("init solo network failed!");
-        LOG.error("jminer.properties: 'soloServer' or 'passPhrase' is missing?!");
-      }
-    }
-    this.defaultTargetDeadline = CoreProperties.getTargetDeadline();
-    this.connectionTimeout = CoreProperties.getConnectionTimeout();
-  }
-
-  @EventListener
-  public void handleMessage(NetworkStateChangeEvent event)
-  {
-    blockNumber = event.getBlockNumber();
-  }
-
-  public void checkNetworkState()
-  {
-    String server = poolMining ? poolServer : soloServer;
-    if(!StringUtils.isEmpty(server))
-    {
-      NetworkRequestMiningInfoTask networkRequestMiningInfoTask = context.getBean(NetworkRequestMiningInfoTask.class);
-      networkRequestMiningInfoTask.init(server, blockNumber, poolMining, connectionTimeout, defaultTargetDeadline);
-      networkPool.execute(networkRequestMiningInfoTask);
-    }
-  }
-
-  // ensure wallet-server does not stuck on solo mining
-  public void triggerServer()
-  {
-    if(!StringUtils.isEmpty(soloServer))
-    {
-      NetworkRequestTriggerServerTask networkRequestTriggerServerTask = context.getBean(NetworkRequestTriggerServerTask.class);
-      networkRequestTriggerServerTask.init(soloServer, numericAccountId, connectionTimeout);
-      networkPool.execute(networkRequestTriggerServerTask);
-    }
-  }
-
-  public void checkLastWinner(long blockNumber)
-  {
-    // find winner of lastBlock on new round, if server available
-    String server = !poolMining ? soloServer : walletServer != null ? walletServer : null;
-    if(!StringUtils.isEmpty(server))
-    {
-      NetworkRequestLastWinnerTask networkRequestLastWinnerTask = context.getBean(NetworkRequestLastWinnerTask.class);
-      networkRequestLastWinnerTask.init(server, blockNumber, connectionTimeout, winnerRetriesOnAsync, winnerRetryIntervalInMs);
-      networkPool.execute(networkRequestLastWinnerTask);
-    }
-  }
-
-  public void checkPoolInfo()
-  {
-    if(CoreProperties.isPoolMining() && walletServer != null)
-    {
-      NetworkRequestPoolInfoTask networkRequestPoolInfoTask = context.getBean(NetworkRequestPoolInfoTask.class);
-      networkRequestPoolInfoTask.init(walletServer, numericAccountId, connectionTimeout);
-      networkPool.execute(networkRequestPoolInfoTask);
-    }
-  }
-
-  public void commitResult(long blockNumber, long calculatedDeadline, BigInteger nonce, BigInteger chunkPartStartNonce, long totalCapacity, BigInteger result)
-  {
-    if(poolMining)
-    {
-      NetworkSubmitPoolNonceTask networkSubmitPoolNonceTask = context.getBean(NetworkSubmitPoolNonceTask.class);
-      networkSubmitPoolNonceTask.init(blockNumber, numericAccountId, poolServer, connectionTimeout, nonce,
-                                      chunkPartStartNonce, calculatedDeadline, totalCapacity, result);
-      networkPool.execute(networkSubmitPoolNonceTask);
-    }
-    else
-    {
-      NetworkSubmitSoloNonceTask networkSubmitSoloNonceTask = context.getBean(NetworkSubmitSoloNonceTask.class);
-      networkSubmitSoloNonceTask.init(blockNumber, passPhrase, soloServer, connectionTimeout, nonce, chunkPartStartNonce, calculatedDeadline, result);
-      networkPool.execute(networkSubmitSoloNonceTask);
-
-      if(CoreProperties.isRecommitDeadlines() && calculatedDeadline < 1200)
-      {
-        // recommit #1 after 5 sec.
-        NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
-        networkSubmitSoloNonceRecommitTask.init(soloServer, 5000L,  passPhrase, connectionTimeout, nonce,  calculatedDeadline);
-        networkPool.execute(networkSubmitSoloNonceRecommitTask);
-
-        // recommit #2 after 10 sec.
-        NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask2 = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
-        networkSubmitSoloNonceRecommitTask2.init(soloServer, 10000L, passPhrase, connectionTimeout, nonce, calculatedDeadline);
-        networkPool.execute(networkSubmitSoloNonceRecommitTask2);
-
-        // recommit #3 after 15 sec.
-        NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask3 = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
-        networkSubmitSoloNonceRecommitTask3.init(soloServer, 15000L, passPhrase, connectionTimeout, nonce, calculatedDeadline);
-        networkPool.execute(networkSubmitSoloNonceRecommitTask3);
-      }
-    }
-  }
-
-  public void startMining()
-  {
-    timer.schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        checkNetworkState();
-      }
-    }, 100, CoreProperties.getRefreshInterval());
-
-    // on solo mining
-    if(!CoreProperties.isPoolMining() && CoreProperties.isTriggerServer())
-    {
-      timer.schedule(new TimerTask()
-      {
-        @Override
-        public void run()
-        {
-          triggerServer();
+            if (!StringUtils.isEmpty(soloServer) && !StringUtils.isEmpty(passPhrase)) {
+                this.soloServer = soloServer;
+                this.passPhrase = passPhrase;
+            } else {
+                LOG.error("init solo network failed!");
+                LOG.error("jminer.properties: 'soloServer' or 'passPhrase' is missing?!");
+            }
         }
-      }, 5000, 25000);
+        this.defaultTargetDeadline = CoreProperties.getTargetDeadline();
+        this.connectionTimeout = CoreProperties.getConnectionTimeout();
     }
-  }
+
+    @EventListener
+    public void handleMessage(NetworkStateChangeEvent event) {
+        blockNumber = event.getBlockNumber();
+    }
+
+    public void checkNetworkState() {
+        String server = poolMining ? poolServer : soloServer;
+        if (!StringUtils.isEmpty(server)) {
+            NetworkRequestMiningInfoTask networkRequestMiningInfoTask = context.getBean(NetworkRequestMiningInfoTask.class);
+            networkRequestMiningInfoTask.init(server, blockNumber, poolMining, connectionTimeout, defaultTargetDeadline);
+            networkPool.execute(networkRequestMiningInfoTask);
+        }
+    }
+
+    // ensure wallet-server does not stuck on solo mining
+    public void triggerServer() {
+        if (!StringUtils.isEmpty(soloServer)) {
+            NetworkRequestTriggerServerTask networkRequestTriggerServerTask = context.getBean(NetworkRequestTriggerServerTask.class);
+            networkRequestTriggerServerTask.init(soloServer, numericAccountId, connectionTimeout);
+            networkPool.execute(networkRequestTriggerServerTask);
+        }
+    }
+
+    public void checkLastWinner(long blockNumber) {
+        // find winner of lastBlock on new round, if server available
+        String server = !poolMining ? soloServer : walletServer != null ? walletServer : null;
+        if (!StringUtils.isEmpty(server)) {
+            NetworkRequestLastWinnerTask networkRequestLastWinnerTask = context.getBean(NetworkRequestLastWinnerTask.class);
+            networkRequestLastWinnerTask.init(server, blockNumber, connectionTimeout, winnerRetriesOnAsync, winnerRetryIntervalInMs);
+            networkPool.execute(networkRequestLastWinnerTask);
+        }
+    }
+
+    public void checkPoolInfo() {
+        if (CoreProperties.isPoolMining() && walletServer != null) {
+            NetworkRequestPoolInfoTask networkRequestPoolInfoTask = context.getBean(NetworkRequestPoolInfoTask.class);
+            networkRequestPoolInfoTask.init(walletServer, numericAccountId, connectionTimeout);
+            networkPool.execute(networkRequestPoolInfoTask);
+        }
+    }
+
+    public void commitResult(long blockNumber, long calculatedDeadline, BigInteger nonce, BigInteger chunkPartStartNonce, long totalCapacity, BigInteger result) {
+        if (poolMining) {
+            NetworkSubmitPoolNonceTask networkSubmitPoolNonceTask = context.getBean(NetworkSubmitPoolNonceTask.class);
+            networkSubmitPoolNonceTask.init(blockNumber, numericAccountId, poolServer, connectionTimeout, nonce,
+                    chunkPartStartNonce, calculatedDeadline, totalCapacity, result);
+            networkPool.execute(networkSubmitPoolNonceTask);
+        } else {
+            NetworkSubmitSoloNonceTask networkSubmitSoloNonceTask = context.getBean(NetworkSubmitSoloNonceTask.class);
+            networkSubmitSoloNonceTask.init(blockNumber, passPhrase, soloServer, connectionTimeout, nonce, chunkPartStartNonce, calculatedDeadline, result);
+            networkPool.execute(networkSubmitSoloNonceTask);
+
+            if (CoreProperties.isRecommitDeadlines() && calculatedDeadline < 1200) {
+                // recommit #1 after 5 sec.
+                NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
+                networkSubmitSoloNonceRecommitTask.init(soloServer, 5000L, passPhrase, connectionTimeout, nonce, calculatedDeadline);
+                networkPool.execute(networkSubmitSoloNonceRecommitTask);
+
+                // recommit #2 after 10 sec.
+                NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask2 = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
+                networkSubmitSoloNonceRecommitTask2.init(soloServer, 10000L, passPhrase, connectionTimeout, nonce, calculatedDeadline);
+                networkPool.execute(networkSubmitSoloNonceRecommitTask2);
+
+                // recommit #3 after 15 sec.
+                NetworkSubmitSoloNonceFallbackTask networkSubmitSoloNonceRecommitTask3 = context.getBean(NetworkSubmitSoloNonceFallbackTask.class);
+                networkSubmitSoloNonceRecommitTask3.init(soloServer, 15000L, passPhrase, connectionTimeout, nonce, calculatedDeadline);
+                networkPool.execute(networkSubmitSoloNonceRecommitTask3);
+            }
+        }
+    }
+
+    public void startMining() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                checkNetworkState();
+            }
+        }, 100, CoreProperties.getRefreshInterval());
+
+        // on solo mining
+        if (!CoreProperties.isPoolMining() && CoreProperties.isTriggerServer()) {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    triggerServer();
+                }
+            }, 5000, 25000);
+        }
+    }
 }

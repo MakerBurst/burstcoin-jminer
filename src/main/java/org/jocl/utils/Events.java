@@ -33,105 +33,90 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.clReleaseEvent;
+import static org.jocl.CL.clWaitForEvents;
 
 /**
  * Utility methods related to events.
  */
-public class Events
-{
-  /**
-   * Compute the execution time for the given event, in milliseconds. This may only be called if the event is associated with a command queue for which
-   * profiling is enabled.
-   *
-   * @param event The event
-   *
-   * @return The execution time, in milliseconds
-   */
-  public static double computeExecutionTimeMs(cl_event event)
-  {
-    long startTime = EventProfilingInfos.getCommandStart(event);
-    long endTime = EventProfilingInfos.getCommandEnd(event);
-    return (endTime - startTime) * 1e-6;
-  }
-
-
-  /**
-   * Wait for the given events if they are not <code>null</code>.
-   *
-   * @param events The events to wait for
-   */
-  public static void waitFor(cl_event... events)
-  {
-    if(events != null)
-    {
-      waitFor(Arrays.asList(events));
+public class Events {
+    /**
+     * Compute the execution time for the given event, in milliseconds. This may only be called if the event is associated with a command queue for which
+     * profiling is enabled.
+     *
+     * @param event The event
+     * @return The execution time, in milliseconds
+     */
+    public static double computeExecutionTimeMs(cl_event event) {
+        long startTime = EventProfilingInfos.getCommandStart(event);
+        long endTime = EventProfilingInfos.getCommandEnd(event);
+        return (endTime - startTime) * 1e-6;
     }
-  }
 
-  /**
-   * Wait for the given events if they are not <code>null</code>.
-   *
-   * @param events The events to wait for
-   */
-  public static void waitFor(Iterable<cl_event> events)
-  {
-    if(events != null)
-    {
-      List<cl_event> eventList = new ArrayList<cl_event>();
-      for(cl_event event : events)
-      {
-        if(event != null)
-        {
-          eventList.add(event);
+
+    /**
+     * Wait for the given events if they are not <code>null</code>.
+     *
+     * @param events The events to wait for
+     */
+    public static void waitFor(cl_event... events) {
+        if (events != null) {
+            waitFor(Arrays.asList(events));
         }
-      }
-      cl_event array[] = eventList.toArray(
-        new cl_event[eventList.size()]);
-      clWaitForEvents(array.length, array);
     }
-  }
 
-
-  /**
-   * Release each of the given events if it is not <code>null</code>.
-   *
-   * @param events The events to release
-   */
-  public static void release(cl_event... events)
-  {
-    if(events != null)
-    {
-      release(Arrays.asList(events));
-    }
-  }
-
-  /**
-   * Release each of the given events if it is not <code>null</code>.
-   *
-   * @param events The events to release
-   */
-  public static void release(Iterable<cl_event> events)
-  {
-    if(events != null)
-    {
-      for(cl_event event : events)
-      {
-        if(event != null)
-        {
-          clReleaseEvent(event);
+    /**
+     * Wait for the given events if they are not <code>null</code>.
+     *
+     * @param events The events to wait for
+     */
+    public static void waitFor(Iterable<cl_event> events) {
+        if (events != null) {
+            List<cl_event> eventList = new ArrayList<cl_event>();
+            for (cl_event event : events) {
+                if (event != null) {
+                    eventList.add(event);
+                }
+            }
+            cl_event array[] = eventList.toArray(
+                    new cl_event[eventList.size()]);
+            clWaitForEvents(array.length, array);
         }
-      }
     }
-  }
 
 
-  /**
-   * Private constructor to prevent instantiation
-   */
-  private Events()
-  {
+    /**
+     * Release each of the given events if it is not <code>null</code>.
+     *
+     * @param events The events to release
+     */
+    public static void release(cl_event... events) {
+        if (events != null) {
+            release(Arrays.asList(events));
+        }
+    }
 
-  }
+    /**
+     * Release each of the given events if it is not <code>null</code>.
+     *
+     * @param events The events to release
+     */
+    public static void release(Iterable<cl_event> events) {
+        if (events != null) {
+            for (cl_event event : events) {
+                if (event != null) {
+                    clReleaseEvent(event);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Private constructor to prevent instantiation
+     */
+    private Events() {
+
+    }
 
 }

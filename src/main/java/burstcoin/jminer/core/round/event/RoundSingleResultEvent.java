@@ -29,83 +29,75 @@ import java.math.BigInteger;
 /**
  * fired on new best deadline below targetDeadline (not confirmed)
  */
-public class RoundSingleResultEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private BigInteger nonce;
-  private BigInteger chunkPartStartNonce;
+public class RoundSingleResultEvent extends ApplicationEvent {
+    private long blockNumber;
+    private BigInteger nonce;
+    private BigInteger chunkPartStartNonce;
 
-  private long calculatedDeadline;
-  private boolean poolMining;
+    private long calculatedDeadline;
+    private boolean poolMining;
 
-  /**
-   * Instantiates a new Round single result event.
-   *
-   * @param blockNumber the block number
-   * @param nonce the nonce
-   * @param chunkPartStartNonce the chunk part start nonce
-   * @param calculatedDeadline the calculated deadline
-   * @param poolMining the pool mining
-   */
-  public RoundSingleResultEvent(long blockNumber, BigInteger nonce, BigInteger chunkPartStartNonce, long calculatedDeadline, boolean poolMining)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Round single result event.
+     *
+     * @param blockNumber         the block number
+     * @param nonce               the nonce
+     * @param chunkPartStartNonce the chunk part start nonce
+     * @param calculatedDeadline  the calculated deadline
+     * @param poolMining          the pool mining
+     */
+    public RoundSingleResultEvent(long blockNumber, BigInteger nonce, BigInteger chunkPartStartNonce, long calculatedDeadline, boolean poolMining) {
+        super(blockNumber);
 
-    this.nonce = nonce;
-    this.blockNumber = blockNumber;
-    this.chunkPartStartNonce = chunkPartStartNonce;
-    this.calculatedDeadline = calculatedDeadline;
-    this.poolMining = poolMining;
-  }
+        this.nonce = nonce;
+        this.blockNumber = blockNumber;
+        this.chunkPartStartNonce = chunkPartStartNonce;
+        this.calculatedDeadline = calculatedDeadline;
+        this.poolMining = poolMining;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets nonce.
-   *
-   * @return the nonce
-   */
-  public BigInteger getNonce()
-  {
-    return nonce;
-  }
+    /**
+     * Gets nonce.
+     *
+     * @return the nonce
+     */
+    public BigInteger getNonce() {
+        return nonce;
+    }
 
-  /**
-   * Gets chunk part start nonce.
-   *
-   * @return the chunk part start nonce
-   */
-  public BigInteger getChunkPartStartNonce()
-  {
-    return chunkPartStartNonce;
-  }
+    /**
+     * Gets chunk part start nonce.
+     *
+     * @return the chunk part start nonce
+     */
+    public BigInteger getChunkPartStartNonce() {
+        return chunkPartStartNonce;
+    }
 
-  /**
-   * Gets calculated deadline.
-   *
-   * @return the calculated deadline
-   */
-  public long getCalculatedDeadline()
-  {
-    return calculatedDeadline;
-  }
+    /**
+     * Gets calculated deadline.
+     *
+     * @return the calculated deadline
+     */
+    public long getCalculatedDeadline() {
+        return calculatedDeadline;
+    }
 
-  /**
-   * Is pool mining.
-   *
-   * @return the boolean
-   */
-  public boolean isPoolMining()
-  {
-    return poolMining;
-  }
+    /**
+     * Is pool mining.
+     *
+     * @return the boolean
+     */
+    public boolean isPoolMining() {
+        return poolMining;
+    }
 }

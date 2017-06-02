@@ -30,78 +30,70 @@ import java.math.BigInteger;
 /**
  * fired if calculatedDeadline was confirmed by server
  */
-public class NetworkResultConfirmedEvent
-  extends ApplicationEvent
-{
-  private long blockNumber;
-  private long deadline;
-  private BigInteger nonce;
+public class NetworkResultConfirmedEvent extends ApplicationEvent {
+    private long blockNumber;
+    private long deadline;
+    private BigInteger nonce;
 
-  private BigInteger chunkPartStartNonce;
-  private BigInteger result;
+    private BigInteger chunkPartStartNonce;
+    private BigInteger result;
 
-  /**
-   * Instantiates a new Network result confirmed event.
-   *
-   * @param blockNumber the block number
-   * @param deadline the deadline
-   * @param nonce the nonce
-   * @param chunkPartStartNonce the chunk part start nonce
-   */
-  public NetworkResultConfirmedEvent(long blockNumber, long deadline, BigInteger nonce, BigInteger chunkPartStartNonce, BigInteger result)
-  {
-    super(blockNumber);
+    /**
+     * Instantiates a new Network result confirmed event.
+     *
+     * @param blockNumber         the block number
+     * @param deadline            the deadline
+     * @param nonce               the nonce
+     * @param chunkPartStartNonce the chunk part start nonce
+     */
+    public NetworkResultConfirmedEvent(long blockNumber, long deadline, BigInteger nonce, BigInteger chunkPartStartNonce, BigInteger result) {
+        super(blockNumber);
 
-    this.blockNumber = blockNumber;
-    this.deadline = deadline;
-    this.nonce = nonce;
+        this.blockNumber = blockNumber;
+        this.deadline = deadline;
+        this.nonce = nonce;
 
-    this.chunkPartStartNonce = chunkPartStartNonce;
-    this.result = result;
-  }
+        this.chunkPartStartNonce = chunkPartStartNonce;
+        this.result = result;
+    }
 
-  /**
-   * Gets chunk part start nonce.
-   *
-   * @return the chunk part start nonce
-   */
-  public BigInteger getChunkPartStartNonce()
-  {
-    return chunkPartStartNonce;
-  }
+    /**
+     * Gets chunk part start nonce.
+     *
+     * @return the chunk part start nonce
+     */
+    public BigInteger getChunkPartStartNonce() {
+        return chunkPartStartNonce;
+    }
 
-  /**
-   * Gets block number.
-   *
-   * @return the block number
-   */
-  public long getBlockNumber()
-  {
-    return blockNumber;
-  }
+    /**
+     * Gets block number.
+     *
+     * @return the block number
+     */
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-  /**
-   * Gets deadline.
-   *
-   * @return the deadline
-   */
-  public long getDeadline()
-  {
-    return deadline;
-  }
+    /**
+     * Gets deadline.
+     *
+     * @return the deadline
+     */
+    public long getDeadline() {
+        return deadline;
+    }
 
-  /**
-   * Gets nonce.
-   *
-   * @return the nonce
-   */
-  public BigInteger getNonce()
-  {
-    return nonce;
-  }
+    /**
+     * Gets nonce.
+     *
+     * @return the nonce
+     */
+    public BigInteger getNonce() {
+        return nonce;
+    }
 
-  public BigInteger getResult()
-  {
-    return result;
-  }
+    public BigInteger getResult() {
+        return result;
+    }
 }
